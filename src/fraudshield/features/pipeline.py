@@ -178,6 +178,14 @@ class TreePreprocessor(BaseEstimator, TransformerMixin):
             c for c in clean_cols if c not in self.categorical_cols_
         ]
 
+        # Enforce that no raw categorical column arrives numeric-coded
+        for col in self.categorical_cols_:
+            if pd.api.types.is_numeric_dtype(X[col]):
+                raise TypeError(
+                    f"Categorical column '{col}' arrived numeric-coded (dtype {X[col].dtype}). "
+                    "All categorical columns must have string/object dtype before preprocessing."
+                )
+
         self.category_maps_ = {}
         for col in self.categorical_cols_:
             valid_cats = X[col].dropna().unique()
@@ -248,6 +256,14 @@ class LinearPreprocessor(BaseEstimator, TransformerMixin):
         self.numeric_cols_ = [
             c for c in clean_cols if c not in self.categorical_cols_
         ]
+
+        # Enforce that no raw categorical column arrives numeric-coded
+        for col in self.categorical_cols_:
+            if pd.api.types.is_numeric_dtype(X[col]):
+                raise TypeError(
+                    f"Categorical column '{col}' arrived numeric-coded (dtype {X[col].dtype}). "
+                    "All categorical columns must have string/object dtype before preprocessing."
+                )
 
         n_train = len(X)
 

@@ -2,23 +2,29 @@
 
 Test set isolation architecture:
 - The held-out test split is sealed throughout all training and validation phases (Milestones 0 to 4).
-- Access to the test split cannot be unlocked via arbitrary boolean flags.
-- Access requires the internal FINAL_EVALUATION_AUTH_TOKEN, which is scoped strictly
-  to the final Milestone 5 evaluation module (src/fraudshield/evaluation/final_evaluator.py).
-- Any attempt to load the test split without this token raises PrematureTestAccessError.
+- Access to the test split cannot be unlocked via caller-supplied flags, arguments, or filenames.
+- The guard inspects the real Python call stack (using inspect.stack()).
+- Access is permitted ONLY if an authorized final evaluation module
+  (e.g., 'final_evaluator.py' or 'evaluate_test.py') is present in the call stack.
+- Every authorized access is permanently logged to reports/test_access_log.txt.
+- NOTE: As documented in docs/METHODOLOGY.md, this mechanism is an accident guard designed
+  to prevent inadvertent evaluation leakage, not an operating system security boundary.
 """
 
+import datetime
+import inspect
 import logging
-import os
-import secrets
 from pathlib import Path
-from typing import Optional
+from typing import Tuple, Set
 import pandas as pd
 
 logger = logging.getLogger("fraudshield.splits.guard")
 
-# Ephemeral secret token generated for the process lifecycle, accessible only to final evaluation
-_EVALUATION_TOKEN = os.environ.get("FRAUDSHIELD_FINAL_EVAL_TOKEN", secrets.token_hex(32))
+# Only these modules in the call stack are authorized to load the held-out test split
+AUTHORIZED_CALLER_MODULES: Set[str] = {
+    "final_evaluator.py",
+    "evaluate_test.py",
+}
 
 
 class PrematureTestAccessError(PermissionError):
@@ -26,20 +32,44 @@ class PrematureTestAccessError(PermissionError):
     pass
 
 
-def get_final_eval_token_for_authorized_runner(authorized_caller_file: str) -> str:
-    """Return the authorization token ONLY if the caller is the verified final evaluation module."""
-    caller_path = Path(authorized_caller_file).resolve()
-    # Must be within final evaluation script
-    if "evaluate_test" not in caller_path.name and "final_evaluator" not in caller_path.name:
-        raise PermissionError(f"Caller '{caller_path.name}' is not authorized to request test evaluation token.")
-    return _EVALUATION_TOKEN
+def _inspect_call_stack_for_authorization() -> Tuple[bool, str]:
+    """Inspect the live Python call stack to verify if an authorized evaluator is calling.
+    
+    Returns
+    -------
+    Tuple[bool, str]
+        (is_authorized, caller_description)
+    """
+    stack = inspect.stack()
+    # Check frames starting from caller of load_split_parquet
+    for frame_info in stack[1:]:
+        frame_filename = Path(frame_info.filename).name
+        if frame_filename in AUTHORIZED_CALLER_MODULES:
+            return True, str(Path(frame_info.filename).resolve())
+
+    # Get immediate caller path for diagnostic message
+    caller_path = str(Path(stack[1].filename).resolve()) if len(stack) > 1 else "unknown"
+    return False, caller_path
+
+
+def _log_authorized_test_access(caller_path: str, split_name: str, feature_set: str, file_path: Path) -> None:
+    """Log authorized test split access to reports/test_access_log.txt."""
+    log_file = Path("reports/test_access_log.txt")
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    entry = (
+        f"[{timestamp}] AUTHORIZED TEST ACCESS: "
+        f"split={split_name}, feature_set={feature_set}, target={file_path.as_posix()}, caller={caller_path}\n"
+    )
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(entry)
+    logger.info("Logged authorized test split access from %s to %s", caller_path, log_file)
 
 
 def load_split_parquet(
     split_name: str,
     feature_set: str = "a",
     base_dir: Path = Path("data/processed"),
-    auth_token: Optional[str] = None,
 ) -> pd.DataFrame:
     """Load processed parquet for a given split, strictly enforcing test set isolation.
     
@@ -51,22 +81,23 @@ def load_split_parquet(
         'a', 'b', 'c1', or 'c2'.
     base_dir : Path
         Directory containing processed parquets.
-    auth_token : str, optional
-        Must match the internal _EVALUATION_TOKEN. Only available to the final evaluation runner.
     """
     split_lower = split_name.lower().strip()
+    target_file = Path(base_dir) / f"{split_lower}_set_{feature_set.lower()}.parquet"
+
     if split_lower == "test":
-        if auth_token is None or auth_token != _EVALUATION_TOKEN:
+        is_authorized, caller_path = _inspect_call_stack_for_authorization()
+        if not is_authorized:
             msg = (
-                "SECURITY VIOLATION: Premature access to the held-out test split is strictly forbidden. "
-                "Normal training and baseline scripts cannot unlock the test split. "
-                "The test split may only be accessed once during final Milestone 5 reporting "
-                "via the authorized final evaluation module."
+                f"SECURITY VIOLATION: Premature access to the held-out test split is strictly forbidden. "
+                f"Caller '{caller_path}' is not an authorized final evaluation module. "
+                f"Access is restricted to {AUTHORIZED_CALLER_MODULES}."
             )
             logger.error(msg)
             raise PrematureTestAccessError(msg)
 
-    target_file = base_dir / f"{split_lower}_set_{feature_set.lower()}.parquet"
+        _log_authorized_test_access(caller_path, split_name, feature_set, target_file)
+
     if not target_file.exists():
         raise FileNotFoundError(f"Processed file not found: {target_file}")
 

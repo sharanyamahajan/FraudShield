@@ -10,6 +10,7 @@ The test split is never loaded or accessed.
 Results are saved to reports/baselines_val.csv and reports/baselines_val.json.
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -24,6 +25,18 @@ import yaml
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import IsolationForest
 import xgboost as xgb
+
+
+def compute_file_sha256(file_path: Path) -> str:
+    """Compute SHA-256 hex digest of a file on disk."""
+    if not file_path.exists():
+        return "missing"
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
 
 from fraudshield.splits.guard import load_split_parquet
 from fraudshield.features.pipeline import (
@@ -89,6 +102,10 @@ def train_and_eval_logistic_regression(
     val_probs = lr.predict_proba(X_vl_proc)[:, 1]
 
     metrics = evaluate_model_performance(y_val, val_probs)
+    n_iter = int(lr.n_iter_[0])
+    converged = bool(n_iter < max_iter)
+    metrics["n_iter"] = n_iter
+    metrics["converged"] = converged
     return metrics, val_probs
 
 
@@ -219,6 +236,8 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
             "pr_auc": m["pr_auc"],
             "roc_auc": m["roc_auc"],
             "brier_score": m["brier_score"],
+            "n_iter": m.get("n_iter", None),
+            "converged": m.get("converged", None),
             "max_achievable_recall_top_0.5pct": max_rec_05,
             "max_achievable_recall_top_1.0pct": max_rec_10,
             "max_achievable_recall_top_2.0pct": max_rec_20,
@@ -320,6 +339,14 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
     csv_path = reports_dir / "baselines_val.csv"
     json_path = reports_dir / "baselines_val.json"
 
+    proc_dir = Path("data/processed")
+    parquet_hashes = {
+        "train_set_a": compute_file_sha256(proc_dir / "train_set_a.parquet"),
+        "val_set_a": compute_file_sha256(proc_dir / "val_set_a.parquet"),
+        "train_set_b": compute_file_sha256(proc_dir / "train_set_b.parquet"),
+        "val_set_b": compute_file_sha256(proc_dir / "val_set_b.parquet"),
+    }
+
     df_results.to_csv(csv_path, index=False)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
@@ -328,6 +355,7 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
             "is_git_dirty": dirty_flag,
             "seed": seed,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "parquet_sha256": parquet_hashes,
             "config_snapshot": cfg,
             "results": results,
         }, f, indent=2)

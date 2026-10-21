@@ -92,23 +92,74 @@ def test_every_row_assigned_to_exactly_one_split():
 
 
 def test_premature_test_split_access_guard_raises_error():
-    """Verify that requesting the test split without authorized evaluation token raises PrematureTestAccessError."""
+    """Verify that calling load_split_parquet for 'test' from an unauthorized caller raises PrematureTestAccessError."""
     from fraudshield.splits.guard import (
         load_split_parquet,
         PrematureTestAccessError,
-        get_final_eval_token_for_authorized_runner,
     )
 
-    # 1. Normal call without token
     with pytest.raises(PrematureTestAccessError, match="Premature access to the held-out test split is strictly forbidden"):
         load_split_parquet("test", feature_set="a")
 
-    # 2. Call with invalid/arbitrary token
-    with pytest.raises(PrematureTestAccessError):
-        load_split_parquet("test", feature_set="a", auth_token="unauthorized_training_script_token")
 
-    # 3. Training script attempting to request evaluation token raises PermissionError
-    with pytest.raises(PermissionError, match="not authorized"):
-        get_final_eval_token_for_authorized_runner("src/fraudshield/models/train_baselines.py")
+def test_authorized_call_to_test_split_logs_and_loads(tmp_path):
+    """Verify that an authorized evaluator module in the call stack can load the test split and logs access."""
+    from pathlib import Path
+    from fraudshield.splits.guard import load_split_parquet
+
+    # Create dummy test parquet in tmp_path
+    dummy_df = pd.DataFrame({"TransactionID": [1, 2], "isFraud": [0, 1]})
+    test_parquet_path = tmp_path / "test_set_a.parquet"
+    dummy_df.to_parquet(test_parquet_path, index=False)
+
+    # Execute a function inside a frame with filename 'final_evaluator.py'
+    code = compile("df = load_split_parquet('test', feature_set='a', base_dir=tmp_path)", "final_evaluator.py", "exec")
+    exec_scope = {
+        "load_split_parquet": load_split_parquet,
+        "tmp_path": tmp_path,
+    }
+    exec(code, exec_scope)
+    loaded = exec_scope["df"]
+    assert len(loaded) == 2
+
+    # Verify that reports/test_access_log.txt was written
+    log_path = Path("reports/test_access_log.txt")
+    assert log_path.exists()
+    content = log_path.read_text(encoding="utf-8")
+    assert "AUTHORIZED TEST ACCESS" in content
+    assert "final_evaluator.py" in content
+
+
+def test_static_analysis_no_unauthorized_module_references_test_split():
+    """Static analysis test: assert that no module except final evaluators references test split or test parquets."""
+    from pathlib import Path
+
+    src_root = Path("src/fraudshield")
+    # Allowed modules to reference test splits/parquets:
+    # guard.py (loader), temporal.py (ingestion partitioner), cli.py (export/pytest CLI), final_evaluator/evaluate_test (M5)
+    allowed_modules = {
+        "guard.py",
+        "temporal.py",
+        "cli.py",
+        "final_evaluator.py",
+        "evaluate_test.py",
+    }
+
+    violations = []
+    for py_file in src_root.rglob("*.py"):
+        if py_file.name in allowed_modules:
+            continue
+        text = py_file.read_text(encoding="utf-8")
+
+        # Check for forbidden patterns
+        if "test_set_" in text:
+            violations.append(f"{py_file.as_posix()}: references 'test_set_'")
+        if 'load_split_parquet("test"' in text or "load_split_parquet('test'" in text:
+            violations.append(f"{py_file.as_posix()}: calls load_split_parquet with 'test'")
+        if 'split_name="test"' in text or "split_name='test'" in text:
+            violations.append(f"{py_file.as_posix()}: specifies split_name='test'")
+
+    assert not violations, f"Unauthorized test split references found: {violations}"
+
 
 

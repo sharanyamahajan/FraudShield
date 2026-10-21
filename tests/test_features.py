@@ -193,3 +193,76 @@ def test_linear_preprocessor_column_counts_and_structure(mock_transaction_datafr
         assert f"{cat}_isna" in out.columns
 
 
+def test_rejection_of_numeric_coded_categoricals():
+    """Assert that passing numeric-coded categorical columns raises TypeError in preprocessors."""
+    from fraudshield.features.pipeline import LinearPreprocessor, TreePreprocessor
+
+    # ProductCD is canonically categorical, but passed here as float
+    numeric_coded_df = pd.DataFrame({
+        "TransactionAmt": [50.0, 100.0],
+        "ProductCD": [1.0, 2.0],
+    })
+
+    with pytest.raises(TypeError, match="arrived numeric-coded"):
+        LinearPreprocessor().fit(numeric_coded_df)
+
+    with pytest.raises(TypeError, match="arrived numeric-coded"):
+        TreePreprocessor().fit(numeric_coded_df)
+
+
+def test_real_processed_parquet_schema_and_preprocessor_output_width():
+    """End-to-end schema test on real processed parquet files:
+    
+    1. All columns in ALL_RAW_CATEGORICAL_COLS must have string/object dtype.
+    2. LinearPreprocessor output width must strictly equal 2 * n_numeric + 3 * n_categorical.
+       (Set A: 12 * 2 + 5 * 3 = 39; Set B: 403 * 2 + 31 * 3 = 899)
+    """
+    from pathlib import Path
+    from fraudshield.features.pipeline import (
+        LinearPreprocessor,
+        ALL_RAW_CATEGORICAL_COLS,
+        get_model_feature_columns,
+    )
+
+    path_a = Path("data/processed/train_set_a.parquet")
+    path_b = Path("data/processed/train_set_b.parquet")
+
+    if not path_a.exists() or not path_b.exists():
+        pytest.skip("Processed parquets not found; skipping real parquet schema test.")
+
+    # 1. Test Set A schema and output width
+    df_a = pd.read_parquet(path_a).head(500)
+    feat_cols_a = get_model_feature_columns(df_a)
+    cats_a = [c for c in feat_cols_a if c in ALL_RAW_CATEGORICAL_COLS]
+    nums_a = [c for c in feat_cols_a if c not in ALL_RAW_CATEGORICAL_COLS]
+
+    for c in cats_a:
+        assert df_a[c].dtype == object, f"Set A categorical column '{c}' is not object dtype: {df_a[c].dtype}"
+
+    prep_a = LinearPreprocessor().fit(df_a[feat_cols_a])
+    out_a = prep_a.transform(df_a[feat_cols_a])
+    expected_width_a = 2 * len(nums_a) + 3 * len(cats_a)
+    assert len(nums_a) == 12
+    assert len(cats_a) == 5
+    assert expected_width_a == 39
+    assert out_a.shape[1] == expected_width_a
+
+    # 2. Test Set B schema and output width
+    df_b = pd.read_parquet(path_b).head(500)
+    feat_cols_b = get_model_feature_columns(df_b)
+    cats_b = [c for c in feat_cols_b if c in ALL_RAW_CATEGORICAL_COLS]
+    nums_b = [c for c in feat_cols_b if c not in ALL_RAW_CATEGORICAL_COLS]
+
+    for c in cats_b:
+        assert df_b[c].dtype == object, f"Set B categorical column '{c}' is not object dtype: {df_b[c].dtype}"
+
+    prep_b = LinearPreprocessor().fit(df_b[feat_cols_b])
+    out_b = prep_b.transform(df_b[feat_cols_b])
+    expected_width_b = 2 * len(nums_b) + 3 * len(cats_b)
+    assert len(nums_b) == 403
+    assert len(cats_b) == 31
+    assert expected_width_b == 899
+    assert out_b.shape[1] == expected_width_b
+
+
+

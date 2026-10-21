@@ -66,13 +66,32 @@ Set C layers engineered behavioral velocity on top of Set B using proxy entity k
 - Validation and Test splits are transformed using the frozen parameters learned on Train.
 - Automated tests verify that transformer parameters remain 100% identical whether or not validation/test rows are observed.
 
-### 3.2 Model Evaluation Caveats & Hypotheses
-- **XGBoost Early Stopping Optimism**: XGBoost uses early stopping on the validation split (`eval_metric="aucpr"`), which means validation scores are slightly optimistic due to stopping rule selection. Unbiased generalization will be confirmed once on the held-out test split in Milestone 5.
-- **Isolation Forest Performance**: Unsupervised Isolation Forest yields substantially lower PR-AUC than supervised baselines. Our working hypothesis is that in tabular transaction fraud, fraudulent records often closely mimic the multivariate distribution of legitimate transactions rather than appearing as isolated geometric outliers. This is a hypothesis to interpret the observed validation metrics, not a confirmed causal claim.
+### 3.2 Preprocessor Architectures & Schemas
+- **Superseded Initial LR Results**: The initial Milestone 3 Logistic Regression run encoded categoricals as arbitrary ordinal integers. Those preliminary results are completely superseded by the frequency-encoded linear preprocessor described below.
+- **LinearPreprocessor (Logistic Regression)**:
+  - **Numeric Features**: Imputed using train medians, scaled via train-fitted `StandardScaler`, and paired with an explicit missingness indicator (`_isna`). Yields **2 columns per numeric feature**.
+  - **Categorical Features**: Encoded using train-fitted relative frequencies ($f_c = \text{count}(c) / N_{\text{train}}$), standard-scaled, and augmented with both an explicit unseen category indicator (`_is_unseen`) and a missingness indicator (`_isna`). Yields **3 columns per categorical feature**.
+  - **Resulting Dimensionality**:
+    - Set A: $12 \times 2 + 5 \times 3 = 39$ columns.
+    - Set B: $403 \times 2 + 31 \times 3 = 899$ columns.
+  - **Baseline Limitation on Identifier Columns**: In Logistic Regression, instrument and geographic proxy identifiers (`card1`, `card2`, `card3`, `card5`, `addr1`, `addr2`) are scaled as continuous numerics. This is a recognized baseline limitation retained without alteration.
+  - **Numeric-Coded Categorical Rejection**: Automated checks guarantee that if any column defined in `ALL_RAW_CATEGORICAL_COLS` arrives with numeric dtype, a `TypeError` is immediately raised.
+- **TreePreprocessor (XGBoost & Isolation Forest)**:
+  - **Categoricals**: Known categories are mapped to train-fitted discrete integer codes ($0, 1, \dots$). Unseen categories in validation/test are mapped to `-1.0`, and missing entries to `-2.0`.
+  - **Numerics**: Preserved as float32 with `NaN` intact, allowing XGBoost's `hist` algorithm to learn optimal default split directions for missing values.
 
-### 3.3 Unseen Category & Missingness Handling
-- **Categoricals**: Known categories in Train are mapped to discrete integers. Unseen categories appearing in Validation or Test are mapped to a reserved missing token (`-1`). Missing categorical values are mapped to `-2`.
-- **Missing Indicators**: In linear models, missing value indicators (`_isna`) are generated alongside median-imputed values. In tree models, numeric NaNs are preserved for native directional split routing in XGBoost.
+### 3.3 Model Evaluation Caveats & Hypotheses
+- **XGBoost Early Stopping Optimism**: XGBoost uses early stopping on the validation split (`eval_metric="aucpr"`), which means validation scores are slightly optimistic due to stopping rule selection. Unbiased generalization will be confirmed once on the held-out test split in Milestone 5.
+- **Isolation Forest Setup & Score Shift Analysis**:
+  - *Preprocessor & Feature Matrix*: Isolation Forest operates on features transformed by `TreePreprocessor` (17 columns for Set A, 434 for Set B). Because scikit-learn's `IsolationForest` cannot ingest `NaN` values, residual missing values are imputed using the train-set column medians (`X_tr.median()`).
+  - *Why IF Scores Changed When XGBoost Did Not*: When categorical columns were rigorously cleaned to ensure consistent string/object types and uniform NaN handling, XGBoost's performance remained invariant (Set A PR-AUC = 0.7028) because XGBoost natively splits on optimal branches and early stopped at the same iteration. In contrast, Isolation Forest builds 100 completely random trees (`max_samples=20000`) by choosing uniform random splits between feature min and max. Cleaning string types and recalculating the imputed medians altered the feature coordinates and bounding boxes of the random cuts, shifting its validation anomaly scores (Set A PR-AUC adjusted from 0.054 to 0.069).
+  - *Outlier Detection Hypothesis*: Unsupervised Isolation Forest yields substantially lower PR-AUC than supervised baselines. Our working hypothesis is that in tabular transaction fraud, fraudulent records often closely mimic the multivariate distribution of legitimate transactions rather than appearing as isolated geometric outliers. This is a hypothesis to interpret the observed validation metrics, not a confirmed causal claim.
+
+### 3.4 Test Split Access Guard
+- Access to the held-out test split is protected by a live call-stack inspection mechanism (`fraudshield.splits.guard.load_split_parquet`).
+- The guard inspects `inspect.stack()` to ensure that only authorized final evaluation modules (`final_evaluator.py`, `evaluate_test.py`) can load test data. Every authorized access is permanently appended to `reports/test_access_log.txt`.
+- > [!IMPORTANT]
+  > As designed, this guard is strictly an **accident guard** to prevent premature evaluation during development, not an operating system security boundary.
 
 ---
 
