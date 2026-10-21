@@ -43,6 +43,7 @@ models/*.bin
 
 # Secrets, Credentials & Local Environment
 kaggle.json
+access_token
 .env
 .env.*
 *.log
