@@ -1,0 +1,54 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Raw and Interim Data (Strict Non-Negotiable Rule)
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Specific large / binary data extensions
+*.zip
+*.tar.gz
+*.csv
+!reports/*.csv
+*.parquet
+*.parquet.*
+
+# Serialized models and large artifacts
+models/*.pkl
+models/*.joblib
+models/*.json
+models/*.bin
+*.sqlite
+*.sqlite3
+*.db
+
+# Secrets, Credentials & Local Environment
+kaggle.json
+.env
+.env.*
+*.log
+
+# IDE & OS specific
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
