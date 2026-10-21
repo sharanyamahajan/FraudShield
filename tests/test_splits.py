@@ -91,10 +91,24 @@ def test_every_row_assigned_to_exactly_one_split():
     assert set(all_split_ids) == set(df["TransactionID"])
 
 
-def test_premature_test_split_access_guard_raises_error(tmp_path):
-    """Verify that requesting the test split without explicit authorization raises PrematureTestAccessError."""
-    from fraudshield.splits.guard import load_split_parquet, PrematureTestAccessError
+def test_premature_test_split_access_guard_raises_error():
+    """Verify that requesting the test split without authorized evaluation token raises PrematureTestAccessError."""
+    from fraudshield.splits.guard import (
+        load_split_parquet,
+        PrematureTestAccessError,
+        get_final_eval_token_for_authorized_runner,
+    )
 
+    # 1. Normal call without token
     with pytest.raises(PrematureTestAccessError, match="Premature access to the held-out test split is strictly forbidden"):
-        load_split_parquet("test", feature_set="a", allow_test_access=False)
+        load_split_parquet("test", feature_set="a")
+
+    # 2. Call with invalid/arbitrary token
+    with pytest.raises(PrematureTestAccessError):
+        load_split_parquet("test", feature_set="a", auth_token="unauthorized_training_script_token")
+
+    # 3. Training script attempting to request evaluation token raises PermissionError
+    with pytest.raises(PermissionError, match="not authorized"):
+        get_final_eval_token_for_authorized_runner("src/fraudshield/models/train_baselines.py")
+
 

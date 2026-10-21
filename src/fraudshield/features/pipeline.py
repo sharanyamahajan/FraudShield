@@ -1,17 +1,21 @@
 """Feature extraction and preprocessing pipelines for Feature Sets A and B.
 
-Set A: Raw transaction attributes + simple transforms (log amount, cents, approximate hour).
-        Strictly excludes any V, C, D, M, or id_* columns.
-Set B: Set A + provided anonymised C, D, M, V columns and identity table columns.
+Explicit schema partitioning:
+- Set A: 12 numeric features + 5 categorical features = 17 features.
+- Set B: 403 numeric features + 31 categorical features = 434 features.
 
-Every encoder, imputer, and scaler is fitted STRICTLY on the TRAIN split.
-- Tree models: Ordinal/integer encoding on Train; unseen -> -1, missing -> -2; native NaN handling.
-- Linear models: Train-fitted relative frequency encoding for categoricals with explicit
-  unseen token (0.0 frequency) and _is_unseen indicator; median imputation and standard scaling.
+All encoders, imputers, and scalers are fitted STRICTLY on the TRAIN split.
+- TreePreprocessor:
+  - Categoricals: train-fitted ordinal integers (unseen -> -1.0, missing -> -2.0).
+  - Numerics: preserved as float32 with NaNs intact for native tree split routing.
+- LinearPreprocessor:
+  - Categoricals: train-fitted relative frequency encoding (freq = count / N_train),
+    scaled with train-fitted mean/std, plus explicit _is_unseen and _isna indicators (3 cols/cat).
+  - Numerics: median imputation fitted on train, standard scaled on train, plus explicit _isna indicator (2 cols/num).
 """
 
 import logging
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, Set
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -21,7 +25,22 @@ logger = logging.getLogger("fraudshield.features.pipeline")
 # Columns that must NEVER be fed into ML models as feature inputs
 METADATA_AND_TARGET_COLS = ["TransactionID", "TransactionDT", "isFraud"]
 
-# Raw transaction columns forming Set A
+# Canonical categorical columns across IEEE-CIS
+ALL_RAW_CATEGORICAL_COLS = [
+    # Set A categoricals (5)
+    "ProductCD",
+    "card4",
+    "card6",
+    "P_emaildomain",
+    "R_emaildomain",
+    # Set B additional categoricals (26)
+    "DeviceType",
+    "DeviceInfo",
+    "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9",
+    "id_12", "id_15", "id_16", "id_23", "id_27", "id_28", "id_29",
+    "id_30", "id_31", "id_33", "id_34", "id_35", "id_36", "id_37", "id_38",
+]
+
 SET_A_RAW_NUMERIC = [
     "TransactionAmt",
     "card1",
@@ -42,8 +61,7 @@ SET_A_RAW_CATEGORICAL = [
     "R_emaildomain",
 ]
 
-# Simple engineered transforms in Set A
-SET_A_ENGINEERED = [
+SET_A_ENGINEERED_NUMERIC = [
     "log_amount",
     "amount_cents",
     "hour_of_day_proxy",
@@ -59,6 +77,7 @@ def extract_set_a_raw(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.D
     """Extract and engineer Set A features from raw dataframe.
     
     Guarantees that NO V, C, D, M, or identity columns are included.
+    Returns 17 un-encoded feature columns (12 numeric, 5 categorical).
     """
     df_out = pd.DataFrame(index=df.index)
 
@@ -69,10 +88,11 @@ def extract_set_a_raw(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.D
         else:
             df_out[col] = np.nan
 
-    # 2. Base categorical columns
+    # 2. Base categorical columns (preserved as string/object with uniform NaN)
     for col in SET_A_RAW_CATEGORICAL:
         if col in df.columns:
-            df_out[col] = df[col].astype(str).replace({"nan": np.nan, "None": np.nan, "": np.nan})
+            s = df[col].astype(str).replace({"nan": np.nan, "None": np.nan, "": np.nan})
+            df_out[col] = s
         else:
             df_out[col] = np.nan
 
@@ -99,8 +119,11 @@ def extract_set_a_raw(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.D
     return df_out
 
 
-def extract_set_b(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.DataFrame:
-    """Extract Set B features: Set A + provided C, D, M, V and identity columns."""
+def extract_set_b_raw(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.DataFrame:
+    """Extract Set B features: Set A + provided C, D, M, V and identity columns.
+    
+    Returns 434 un-encoded feature columns (403 numeric, 31 categorical).
+    """
     df_a = extract_set_a_raw(df, time_col=time_col)
     df_b = df_a.copy()
 
@@ -118,12 +141,15 @@ def extract_set_b(df: pd.DataFrame, time_col: str = "TransactionDT") -> pd.DataF
     ]
 
     for col in set_b_cols:
-        if pd.api.types.is_numeric_dtype(df[col]):
-            df_b[col] = df[col].astype(np.float32)
-        else:
+        if col in ALL_RAW_CATEGORICAL_COLS or not pd.api.types.is_numeric_dtype(df[col]):
             df_b[col] = df[col].astype(str).replace({"nan": np.nan, "None": np.nan, "": np.nan})
+        else:
+            df_b[col] = pd.to_numeric(df[col], errors="coerce").astype(np.float32)
 
     return df_b
+
+
+extract_set_b = extract_set_b_raw
 
 
 class TreePreprocessor(BaseEstimator, TransformerMixin):
@@ -146,7 +172,7 @@ class TreePreprocessor(BaseEstimator, TransformerMixin):
         clean_cols = [c for c in X.columns if c not in METADATA_AND_TARGET_COLS]
         self.feature_names_ = clean_cols
         self.categorical_cols_ = [
-            c for c in clean_cols if not pd.api.types.is_numeric_dtype(X[c])
+            c for c in clean_cols if c in ALL_RAW_CATEGORICAL_COLS or not pd.api.types.is_numeric_dtype(X[c])
         ]
         self.numeric_cols_ = [
             c for c in clean_cols if c not in self.categorical_cols_
@@ -187,17 +213,19 @@ class TreePreprocessor(BaseEstimator, TransformerMixin):
 class LinearPreprocessor(BaseEstimator, TransformerMixin):
     """Preprocessor for linear models (Logistic Regression).
     
-    Categorical handling:
-    - Never uses arbitrary integer codes.
-    - Fits relative frequency encoding strictly on TRAIN: freq(cat) = count(cat) / N_train.
-    - Unseen categories in validation/test receive frequency = 0.0 and an explicit _is_unseen indicator.
-    - Missing categorical values receive frequency = 0.0 and an explicit _isna indicator.
-    - Relative frequencies are scaled using train-fitted mean and standard deviation.
-
-    Numeric handling:
-    - Median imputation fitted strictly on TRAIN.
-    - Explicit _isna missingness indicator.
-    - StandardScaler fitted strictly on imputed TRAIN features.
+    Explicit Partitioning:
+    - Categorical features (identified by ALL_RAW_CATEGORICAL_COLS):
+      - Relative frequency encoding fitted on TRAIN: freq(c) = count(c) / N_train.
+      - Frequency feature is standard-scaled using train mean and std: (freq - mean) / std.
+      - Explicit _is_unseen indicator (1.0 if category was never seen in train, 0.0 otherwise).
+      - Explicit _isna indicator (1.0 if category was missing, 0.0 otherwise).
+      - Total columns per categorical = 3 columns.
+    
+    - Numeric features:
+      - Median imputation fitted on TRAIN.
+      - Standard scaling fitted on TRAIN: (val - mean) / std.
+      - Explicit _isna indicator (1.0 if value was missing, 0.0 otherwise).
+      - Total columns per numeric = 2 columns.
     """
 
     def __init__(self):
@@ -215,7 +243,7 @@ class LinearPreprocessor(BaseEstimator, TransformerMixin):
         clean_cols = [c for c in X.columns if c not in METADATA_AND_TARGET_COLS]
         self.feature_names_ = clean_cols
         self.categorical_cols_ = [
-            c for c in clean_cols if not pd.api.types.is_numeric_dtype(X[c])
+            c for c in clean_cols if c in ALL_RAW_CATEGORICAL_COLS or not pd.api.types.is_numeric_dtype(X[c])
         ]
         self.numeric_cols_ = [
             c for c in clean_cols if c not in self.categorical_cols_
@@ -261,7 +289,7 @@ class LinearPreprocessor(BaseEstimator, TransformerMixin):
         """Apply train-fitted imputation, frequency encoding, unseen indicators, and scaling."""
         data_dict = {}
 
-        # Numerics: scaled value + missing indicator
+        # Numerics: scaled value + missing indicator (2 cols)
         for col in self.numeric_cols_:
             raw = pd.to_numeric(X[col], errors="coerce").values if col in X.columns else np.full(len(X), np.nan)
             is_missing = np.isnan(raw).astype(np.float32)
@@ -271,7 +299,7 @@ class LinearPreprocessor(BaseEstimator, TransformerMixin):
             data_dict[col] = scaled.astype(np.float32)
             data_dict[f"{col}_isna"] = is_missing
 
-        # Categoricals: frequency scaled + is_unseen indicator + isna indicator
+        # Categoricals: frequency scaled + is_unseen indicator + isna indicator (3 cols)
         for col in self.categorical_cols_:
             if col in X.columns:
                 series = X[col]

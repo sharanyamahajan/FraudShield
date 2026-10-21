@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from fraudshield.features.pipeline import (
     extract_set_a_raw,
+    extract_set_b_raw,
     extract_set_b,
     TreePreprocessor,
     LinearPreprocessor,
@@ -68,7 +69,7 @@ def test_set_a_strictly_excludes_anonymised_and_identity_columns(mock_transactio
 def test_set_b_includes_set_a_and_provided_columns(mock_transaction_dataframe):
     """Assert Set B includes all Set A features plus anonymised C, D, M, V and identity columns."""
     df_a = extract_set_a_raw(mock_transaction_dataframe)
-    df_b = extract_set_b(mock_transaction_dataframe)
+    df_b = extract_set_b_raw(mock_transaction_dataframe)
 
     assert set(df_a.columns).issubset(set(df_b.columns))
     assert "C1" in df_b.columns
@@ -170,4 +171,25 @@ def test_unseen_categories_map_to_reserved_value():
     assert linear_res["cat_is_unseen"].iloc[1] == 1.0  # unseen 'green'
     assert linear_res["cat_is_unseen"].iloc[2] == 0.0  # missing is not unseen, it's missing
     assert linear_res["cat_isna"].iloc[2] == 1.0       # missing flag
+
+
+def test_linear_preprocessor_column_counts_and_structure(mock_transaction_dataframe):
+    """Verify LinearPreprocessor outputs exactly 2 cols per numeric and 3 cols per categorical (39 total for Set A)."""
+    from fraudshield.features.pipeline import get_model_feature_columns, SET_A_RAW_CATEGORICAL
+
+    df_a = extract_set_a_raw(mock_transaction_dataframe)
+    feat_cols = get_model_feature_columns(df_a)
+
+    prep = LinearPreprocessor().fit(df_a[feat_cols])
+    out = prep.transform(df_a[feat_cols])
+
+    # 12 numerics * 2 + 5 categoricals * 3 = 24 + 15 = 39 columns
+    assert out.shape[1] == 39
+
+    # Verify each categorical has _freq, _is_unseen, and _isna
+    for cat in SET_A_RAW_CATEGORICAL:
+        assert f"{cat}_freq" in out.columns
+        assert f"{cat}_is_unseen" in out.columns
+        assert f"{cat}_isna" in out.columns
+
 

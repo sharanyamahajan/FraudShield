@@ -49,6 +49,9 @@ Set B adds all proprietary engineered attributes supplied in the dataset:
 - **V1–V339**: Vesta-engineered rich transaction attributes.
 - **Identity Features**: `DeviceType`, `DeviceInfo`, and `id_01` through `id_38`.
 
+> [!NOTE]
+> Set B already contains Vesta's proprietary C (count) and D (timedelta) columns. This means Set B already incorporates masked, vendor-engineered historical signals before our explicit, leakage-safe backward-looking entity history features (Set C) are introduced in Milestone 4.
+
 ### 2.3 Set C: Backward-Looking Entity History (Milestone 4)
 Set C layers engineered behavioral velocity on top of Set B using proxy entity keys (`card1` primary, `card1+addr1` secondary).
 - Evaluated strictly with $T_{\text{prior}} < T_{\text{current}}$.
@@ -62,6 +65,10 @@ Set C layers engineered behavioral velocity on top of Set B using proxy entity k
 - All imputers (e.g. median calculation for numeric features), standard scalers, and categorical encoders are fitted **strictly on the Train split**.
 - Validation and Test splits are transformed using the frozen parameters learned on Train.
 - Automated tests verify that transformer parameters remain 100% identical whether or not validation/test rows are observed.
+
+### 3.2 Model Evaluation Caveats & Hypotheses
+- **XGBoost Early Stopping Optimism**: XGBoost uses early stopping on the validation split (`eval_metric="aucpr"`), which means validation scores are slightly optimistic due to stopping rule selection. Unbiased generalization will be confirmed once on the held-out test split in Milestone 5.
+- **Isolation Forest Performance**: Unsupervised Isolation Forest yields substantially lower PR-AUC than supervised baselines. Our working hypothesis is that in tabular transaction fraud, fraudulent records often closely mimic the multivariate distribution of legitimate transactions rather than appearing as isolated geometric outliers. This is a hypothesis to interpret the observed validation metrics, not a confirmed causal claim.
 
 ### 3.2 Unseen Category & Missingness Handling
 - **Categoricals**: Known categories in Train are mapped to discrete integers. Unseen categories appearing in Validation or Test are mapped to a reserved missing token (`-1`). Missing categorical values are mapped to `-2`.

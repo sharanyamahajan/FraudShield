@@ -17,7 +17,7 @@ import subprocess
 import time
 import uuid
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import numpy as np
 import pandas as pd
 import yaml
@@ -50,6 +50,17 @@ def get_git_commit_hash() -> str:
     except Exception:
         pass
     return "unknown"
+
+
+def is_git_dirty() -> bool:
+    """Check if the git working tree has unstaged or uncommitted changes."""
+    try:
+        res = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        if res.returncode == 0:
+            return bool(res.stdout.strip())
+    except Exception:
+        pass
+    return False
 
 
 def train_and_eval_logistic_regression(
@@ -90,12 +101,17 @@ def train_and_eval_isolation_forest(
 ) -> Tuple[Dict[str, Any], np.ndarray]:
     """Train unsupervised Isolation Forest on train features only, score = -score_samples (higher = riskier)."""
     logger.info("Training Isolation Forest (unsupervised)...")
-    prep = LinearPreprocessor().fit(X_train_raw)
+    # TreePreprocessor converts categoricals to ordinal codes for tree construction
+    prep = TreePreprocessor().fit(X_train_raw)
     X_tr_proc = prep.transform(X_train_raw)
     X_vl_proc = prep.transform(X_val_raw)
 
-    # Subsample 20,000 points for tree construction to maintain high speed and low memory
-    max_samples = min(20000, len(X_tr_proc))
+    # Impute remaining NaNs with train median for Isolation Forest
+    fill_vals = X_tr_proc.median()
+    X_tr_filled = X_tr_proc.fillna(fill_vals)
+    X_vl_filled = X_vl_proc.fillna(fill_vals)
+
+    max_samples = min(20000, len(X_tr_filled))
     iforest = IsolationForest(
         n_estimators=n_estimators,
         max_samples=max_samples,
@@ -103,11 +119,10 @@ def train_and_eval_isolation_forest(
         random_state=random_state,
         n_jobs=-1,
     )
-    iforest.fit(X_tr_proc)
+    iforest.fit(X_tr_filled)
 
-    # IsolationForest.score_samples returns lower values for more anomalous instances
-    # We negate it so higher values indicate greater anomaly risk
-    raw_scores = iforest.score_samples(X_vl_proc)
+    # IsolationForest.score_samples returns lower values for more anomalous instances; negate so higher = riskier
+    raw_scores = iforest.score_samples(X_vl_filled)
     val_anomaly_scores = -1.0 * raw_scores
 
     metrics = evaluate_model_performance(y_val, val_anomaly_scores)
@@ -167,16 +182,24 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
     seed = cfg["seed"]
     run_id = str(uuid.uuid4())[:8]
     git_hash = get_git_commit_hash()
+    dirty_flag = is_git_dirty()
 
-    logger.info("Starting Baseline Evaluation on VALIDATION split (Run ID: %s, Git: %s)...", run_id, git_hash)
+    logger.info("Starting Baseline Evaluation on VALIDATION split (Run ID: %s, Git: %s, Dirty: %s)...", run_id, git_hash, dirty_flag)
 
     # 1. Load Train and Validation for Set A
-    df_train_a = load_split_parquet("train", feature_set="a", allow_test_access=False)
-    df_val_a = load_split_parquet("val", feature_set="a", allow_test_access=False)
+    df_train_a = load_split_parquet("train", feature_set="a")
+    df_val_a = load_split_parquet("val", feature_set="a")
 
     feature_cols_a = get_model_feature_columns(df_train_a)
     y_train = df_train_a["isFraud"].values.astype(int)
     y_val = df_val_a["isFraud"].values.astype(int)
+
+    n_val_total = len(y_val)
+    n_val_pos = int(np.sum(y_val == 1))
+    max_rec_05 = round(min(max(1, int(round(n_val_total * 0.005))), n_val_pos) / n_val_pos, 6)
+    max_rec_10 = round(min(max(1, int(round(n_val_total * 0.010))), n_val_pos) / n_val_pos, 6)
+    max_rec_20 = round(min(max(1, int(round(n_val_total * 0.020))), n_val_pos) / n_val_pos, 6)
+    max_rec_50 = round(min(max(1, int(round(n_val_total * 0.050))), n_val_pos) / n_val_pos, 6)
 
     n_pos = int(np.sum(y_train == 1))
     n_neg = int(np.sum(y_train == 0))
@@ -185,181 +208,109 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
 
     results = []
 
+    def build_row(feature_set: str, model_name: str, variant: str, m: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "run_id": run_id,
+            "git_hash": git_hash,
+            "is_git_dirty": dirty_flag,
+            "feature_set": feature_set,
+            "model_name": model_name,
+            "variant": variant,
+            "pr_auc": m["pr_auc"],
+            "roc_auc": m["roc_auc"],
+            "brier_score": m["brier_score"],
+            "max_achievable_recall_top_0.5pct": max_rec_05,
+            "max_achievable_recall_top_1.0pct": max_rec_10,
+            "max_achievable_recall_top_2.0pct": max_rec_20,
+            "max_achievable_recall_top_5.0pct": max_rec_50,
+            "recall_top_0.5pct": m["budgets"]["top_0.5pct"]["recall"],
+            "recall_top_1.0pct": m["budgets"]["top_1.0pct"]["recall"],
+            "recall_top_2.0pct": m["budgets"]["top_2.0pct"]["recall"],
+            "recall_top_5.0pct": m["budgets"]["top_5.0pct"]["recall"],
+            "precision_top_0.5pct": m["budgets"]["top_0.5pct"]["precision"],
+            "precision_top_1.0pct": m["budgets"]["top_1.0pct"]["precision"],
+            "precision_top_2.0pct": m["budgets"]["top_2.0pct"]["precision"],
+            "precision_top_5.0pct": m["budgets"]["top_5.0pct"]["precision"],
+            "fpr_top_0.5pct": m["budgets"]["top_0.5pct"]["fpr"],
+            "fpr_top_1.0pct": m["budgets"]["top_1.0pct"]["fpr"],
+            "fpr_top_2.0pct": m["budgets"]["top_2.0pct"]["fpr"],
+            "fpr_top_5.0pct": m["budgets"]["top_5.0pct"]["fpr"],
+        }
+
     # ==========================
     # SET A BASELINES
     # ==========================
     logger.info("--- EVALUATING SET A BASELINES ---")
 
-    # 1. Logistic Regression (no class_weight)
+    # 1. Logistic Regression (class_weight=None)
     m_lr_none, _ = train_and_eval_logistic_regression(
         df_train_a[feature_cols_a], y_train, df_val_a[feature_cols_a], y_val, class_weight=None, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set A",
-        "model_name": "Logistic Regression", "variant": "class_weight=None",
-        "pr_auc": m_lr_none["pr_auc"], "roc_auc": m_lr_none["roc_auc"], "brier_score": m_lr_none["brier_score"],
-        "recall_top_0.5pct": m_lr_none["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_lr_none["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_lr_none["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_lr_none["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_lr_none["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_lr_none["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set A", "Logistic Regression", "class_weight=None", m_lr_none))
 
     # 2. Logistic Regression (balanced)
     m_lr_bal, _ = train_and_eval_logistic_regression(
         df_train_a[feature_cols_a], y_train, df_val_a[feature_cols_a], y_val, class_weight="balanced", random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set A",
-        "model_name": "Logistic Regression", "variant": "class_weight=balanced",
-        "pr_auc": m_lr_bal["pr_auc"], "roc_auc": m_lr_bal["roc_auc"], "brier_score": m_lr_bal["brier_score"],
-        "recall_top_0.5pct": m_lr_bal["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_lr_bal["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_lr_bal["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_lr_bal["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_lr_bal["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_lr_bal["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set A", "Logistic Regression", "class_weight=balanced", m_lr_bal))
 
     # 3. Isolation Forest (unsupervised)
     m_if, _ = train_and_eval_isolation_forest(
         df_train_a[feature_cols_a], df_val_a[feature_cols_a], y_val, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set A",
-        "model_name": "Isolation Forest", "variant": "unsupervised",
-        "pr_auc": m_if["pr_auc"], "roc_auc": m_if["roc_auc"], "brier_score": m_if["brier_score"],
-        "recall_top_0.5pct": m_if["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_if["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_if["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_if["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_if["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_if["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set A", "Isolation Forest", "unsupervised", m_if))
 
     # 4. XGBoost (scale_pos_weight=None)
     m_xgb_none, _ = train_and_eval_xgboost(
         df_train_a[feature_cols_a], y_train, df_val_a[feature_cols_a], y_val, scale_pos_weight=None, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set A",
-        "model_name": "XGBoost", "variant": "scale_pos_weight=None",
-        "pr_auc": m_xgb_none["pr_auc"], "roc_auc": m_xgb_none["roc_auc"], "brier_score": m_xgb_none["brier_score"],
-        "recall_top_0.5pct": m_xgb_none["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_xgb_none["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_xgb_none["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_xgb_none["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_xgb_none["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_xgb_none["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set A", "XGBoost", "scale_pos_weight=None", m_xgb_none))
 
     # 5. XGBoost (scale_pos_weight=train_spw)
     m_xgb_spw, _ = train_and_eval_xgboost(
         df_train_a[feature_cols_a], y_train, df_val_a[feature_cols_a], y_val, scale_pos_weight=train_spw, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set A",
-        "model_name": "XGBoost", "variant": f"scale_pos_weight={train_spw:.2f}",
-        "pr_auc": m_xgb_spw["pr_auc"], "roc_auc": m_xgb_spw["roc_auc"], "brier_score": m_xgb_spw["brier_score"],
-        "recall_top_0.5pct": m_xgb_spw["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_xgb_spw["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_xgb_spw["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_xgb_spw["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_xgb_spw["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_xgb_spw["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set A", "XGBoost", f"scale_pos_weight={train_spw:.2f}", m_xgb_spw))
 
-    # Clean up Set A data from memory before loading Set B
     del df_train_a, df_val_a
 
     # ==========================
     # SET B BASELINES
     # ==========================
     logger.info("--- EVALUATING SET B BASELINES ---")
-    df_train_b = load_split_parquet("train", feature_set="b", allow_test_access=False)
-    df_val_b = load_split_parquet("val", feature_set="b", allow_test_access=False)
+    df_train_b = load_split_parquet("train", feature_set="b")
+    df_val_b = load_split_parquet("val", feature_set="b")
     feature_cols_b = get_model_feature_columns(df_train_b)
 
-    # 6. Logistic Regression on Set B (no class_weight)
+    # 6. Logistic Regression on Set B (class_weight=None)
     m_lr_b_none, _ = train_and_eval_logistic_regression(
         df_train_b[feature_cols_b], y_train, df_val_b[feature_cols_b], y_val, class_weight=None, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set B",
-        "model_name": "Logistic Regression", "variant": "class_weight=None",
-        "pr_auc": m_lr_b_none["pr_auc"], "roc_auc": m_lr_b_none["roc_auc"], "brier_score": m_lr_b_none["brier_score"],
-        "recall_top_0.5pct": m_lr_b_none["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_lr_b_none["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_lr_b_none["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_lr_b_none["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_lr_b_none["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_lr_b_none["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set B", "Logistic Regression", "class_weight=None", m_lr_b_none))
 
     # 7. Logistic Regression on Set B (balanced)
     m_lr_b_bal, _ = train_and_eval_logistic_regression(
         df_train_b[feature_cols_b], y_train, df_val_b[feature_cols_b], y_val, class_weight="balanced", random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set B",
-        "model_name": "Logistic Regression", "variant": "class_weight=balanced",
-        "pr_auc": m_lr_b_bal["pr_auc"], "roc_auc": m_lr_b_bal["roc_auc"], "brier_score": m_lr_b_bal["brier_score"],
-        "recall_top_0.5pct": m_lr_b_bal["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_lr_b_bal["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_lr_b_bal["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_lr_b_bal["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_lr_b_bal["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_lr_b_bal["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set B", "Logistic Regression", "class_weight=balanced", m_lr_b_bal))
 
     # 8. Isolation Forest on Set B (unsupervised)
     m_if_b, _ = train_and_eval_isolation_forest(
         df_train_b[feature_cols_b], df_val_b[feature_cols_b], y_val, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set B",
-        "model_name": "Isolation Forest", "variant": "unsupervised",
-        "pr_auc": m_if_b["pr_auc"], "roc_auc": m_if_b["roc_auc"], "brier_score": m_if_b["brier_score"],
-        "recall_top_0.5pct": m_if_b["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_if_b["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_if_b["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_if_b["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_if_b["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_if_b["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set B", "Isolation Forest", "unsupervised", m_if_b))
 
     # 9. XGBoost on Set B (scale_pos_weight=None)
     m_xgb_b_none, _ = train_and_eval_xgboost(
         df_train_b[feature_cols_b], y_train, df_val_b[feature_cols_b], y_val, scale_pos_weight=None, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set B",
-        "model_name": "XGBoost", "variant": "scale_pos_weight=None",
-        "pr_auc": m_xgb_b_none["pr_auc"], "roc_auc": m_xgb_b_none["roc_auc"], "brier_score": m_xgb_b_none["brier_score"],
-        "recall_top_0.5pct": m_xgb_b_none["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_xgb_b_none["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_xgb_b_none["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_xgb_b_none["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_xgb_b_none["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_xgb_b_none["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set B", "XGBoost", "scale_pos_weight=None", m_xgb_b_none))
 
     # 10. XGBoost on Set B (scale_pos_weight=train_spw)
     m_xgb_b_spw, _ = train_and_eval_xgboost(
         df_train_b[feature_cols_b], y_train, df_val_b[feature_cols_b], y_val, scale_pos_weight=train_spw, random_state=seed
     )
-    results.append({
-        "run_id": run_id, "git_hash": git_hash, "feature_set": "Set B",
-        "model_name": "XGBoost", "variant": f"scale_pos_weight={train_spw:.2f}",
-        "pr_auc": m_xgb_b_spw["pr_auc"], "roc_auc": m_xgb_b_spw["roc_auc"], "brier_score": m_xgb_b_spw["brier_score"],
-        "recall_top_0.5pct": m_xgb_b_spw["budgets"]["top_0.5pct"]["recall"],
-        "recall_top_1.0pct": m_xgb_b_spw["budgets"]["top_1.0pct"]["recall"],
-        "recall_top_2.0pct": m_xgb_b_spw["budgets"]["top_2.0pct"]["recall"],
-        "recall_top_5.0pct": m_xgb_b_spw["budgets"]["top_5.0pct"]["recall"],
-        "fpr_top_1.0pct": m_xgb_b_spw["budgets"]["top_1.0pct"]["fpr"],
-        "precision_top_1.0pct": m_xgb_b_spw["budgets"]["top_1.0pct"]["precision"],
-    })
+    results.append(build_row("Set B", "XGBoost", f"scale_pos_weight={train_spw:.2f}", m_xgb_b_spw))
 
     df_results = pd.DataFrame(results)
 
@@ -374,6 +325,7 @@ def run_validation_baselines(config_path: Path = Path("configs/config.yaml")) ->
         json.dump({
             "run_id": run_id,
             "git_commit_hash": git_hash,
+            "is_git_dirty": dirty_flag,
             "seed": seed,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "config_snapshot": cfg,

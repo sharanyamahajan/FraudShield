@@ -63,7 +63,7 @@ def run_features(args: argparse.Namespace) -> int:
     """Build temporal splits and feature sets A and B (Milestone 2)."""
     import json
     from fraudshield.splits.temporal import create_temporal_splits
-    from fraudshield.features.pipeline import extract_set_a_raw, extract_set_b, TreePreprocessor
+    from fraudshield.features.pipeline import extract_set_a_raw, extract_set_b_raw, extract_set_b, TreePreprocessor
     import yaml
     from pathlib import Path
 
@@ -102,62 +102,40 @@ def run_features(args: argparse.Namespace) -> int:
 
     # 2. Extract Set A
     logger.info("Extracting Feature Set A (Transaction-only)...")
-    train_a_raw = extract_set_a_raw(train_df, time_col=cfg["data"]["time_col"])
-    val_a_raw = extract_set_a_raw(val_df, time_col=cfg["data"]["time_col"])
-    test_a_raw = extract_set_a_raw(test_df, time_col=cfg["data"]["time_col"])
+    train_a = extract_set_a_raw(train_df, time_col=cfg["data"]["time_col"])
+    val_a = extract_set_a_raw(val_df, time_col=cfg["data"]["time_col"])
+    test_a = extract_set_a_raw(test_df, time_col=cfg["data"]["time_col"])
 
-    # Fit TreePreprocessor strictly on train_a_raw
-    prep_a = TreePreprocessor()
-    prep_a.fit(train_a_raw)
-    train_a_proc = prep_a.transform(train_a_raw)
-    val_a_proc = prep_a.transform(val_a_raw)
-    test_a_proc = prep_a.transform(test_a_raw)
-
-    # Attach targets and IDs
-    for split_data, proc, raw in [
-        (train_df, train_a_proc, train_a_raw),
-        (val_df, val_a_proc, val_a_raw),
-        (test_df, test_a_proc, test_a_raw),
-    ]:
-        proc["TransactionID"] = split_data[cfg["data"]["id_col"]].values
-        proc["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
-        proc["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
+    for split_data, df_feat in [(train_df, train_a), (val_df, val_a), (test_df, test_a)]:
+        df_feat["TransactionID"] = split_data[cfg["data"]["id_col"]].values
+        df_feat["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
+        df_feat["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
 
     # 3. Extract Set B
     logger.info("Extracting Feature Set B (Set A + C/D/M/V + Identity)...")
-    train_b_raw = extract_set_b(train_df, time_col=cfg["data"]["time_col"])
-    val_b_raw = extract_set_b(val_df, time_col=cfg["data"]["time_col"])
-    test_b_raw = extract_set_b(test_df, time_col=cfg["data"]["time_col"])
+    train_b = extract_set_b_raw(train_df, time_col=cfg["data"]["time_col"])
+    val_b = extract_set_b_raw(val_df, time_col=cfg["data"]["time_col"])
+    test_b = extract_set_b_raw(test_df, time_col=cfg["data"]["time_col"])
 
-    prep_b = TreePreprocessor()
-    prep_b.fit(train_b_raw)
-    train_b_proc = prep_b.transform(train_b_raw)
-    val_b_proc = prep_b.transform(val_b_raw)
-    test_b_proc = prep_b.transform(test_b_raw)
-
-    for split_data, proc in [
-        (train_df, train_b_proc),
-        (val_df, val_b_proc),
-        (test_df, test_b_proc),
-    ]:
-        proc["TransactionID"] = split_data[cfg["data"]["id_col"]].values
-        proc["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
-        proc["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
+    for split_data, df_feat in [(train_df, train_b), (val_df, val_b), (test_df, test_b)]:
+        df_feat["TransactionID"] = split_data[cfg["data"]["id_col"]].values
+        df_feat["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
+        df_feat["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
 
     # 4. Save to processed directory
     proc_dir = Path(cfg["paths"]["processed_data_dir"])
     proc_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Saving processed datasets to %s ...", proc_dir)
-    train_a_proc.to_parquet(proc_dir / "train_set_a.parquet", compression="snappy", index=False)
-    val_a_proc.to_parquet(proc_dir / "val_set_a.parquet", compression="snappy", index=False)
-    test_a_proc.to_parquet(proc_dir / "test_set_a.parquet", compression="snappy", index=False)
+    logger.info("Saving unencoded processed datasets to %s ...", proc_dir)
+    train_a.to_parquet(proc_dir / "train_set_a.parquet", compression="snappy", index=False)
+    val_a.to_parquet(proc_dir / "val_set_a.parquet", compression="snappy", index=False)
+    test_a.to_parquet(proc_dir / "test_set_a.parquet", compression="snappy", index=False)
 
-    train_b_proc.to_parquet(proc_dir / "train_set_b.parquet", compression="snappy", index=False)
-    val_b_proc.to_parquet(proc_dir / "val_set_b.parquet", compression="snappy", index=False)
-    test_b_proc.to_parquet(proc_dir / "test_set_b.parquet", compression="snappy", index=False)
+    train_b.to_parquet(proc_dir / "train_set_b.parquet", compression="snappy", index=False)
+    val_b.to_parquet(proc_dir / "val_set_b.parquet", compression="snappy", index=False)
+    test_b.to_parquet(proc_dir / "test_set_b.parquet", compression="snappy", index=False)
 
-    logger.info("Set A columns: %d | Set B columns: %d", train_a_proc.shape[1], train_b_proc.shape[1])
+    logger.info("Set A total columns (with meta): %d | Set B total columns: %d", train_a.shape[1], train_b.shape[1])
     logger.info("Milestone 2 feature pipeline execution complete.")
     return 0
 
