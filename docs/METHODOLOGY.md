@@ -70,7 +70,7 @@ Set C layers engineered behavioral velocity on top of Set B using proxy entity k
 - **XGBoost Early Stopping Optimism**: XGBoost uses early stopping on the validation split (`eval_metric="aucpr"`), which means validation scores are slightly optimistic due to stopping rule selection. Unbiased generalization will be confirmed once on the held-out test split in Milestone 5.
 - **Isolation Forest Performance**: Unsupervised Isolation Forest yields substantially lower PR-AUC than supervised baselines. Our working hypothesis is that in tabular transaction fraud, fraudulent records often closely mimic the multivariate distribution of legitimate transactions rather than appearing as isolated geometric outliers. This is a hypothesis to interpret the observed validation metrics, not a confirmed causal claim.
 
-### 3.2 Unseen Category & Missingness Handling
+### 3.3 Unseen Category & Missingness Handling
 - **Categoricals**: Known categories in Train are mapped to discrete integers. Unseen categories appearing in Validation or Test are mapped to a reserved missing token (`-1`). Missing categorical values are mapped to `-2`.
 - **Missing Indicators**: In linear models, missing value indicators (`_isna`) are generated alongside median-imputed values. In tree models, numeric NaNs are preserved for native directional split routing in XGBoost.
 
