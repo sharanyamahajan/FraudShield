@@ -68,3 +68,33 @@ def test_invalid_split_ratios_raise_error():
     })
     with pytest.raises(ValueError, match="must sum to 1.0"):
         create_temporal_splits(df, train_ratio=0.5, val_ratio=0.2, test_ratio=0.2)
+
+
+def test_every_row_assigned_to_exactly_one_split():
+    """Assert every single input row is assigned to exactly one split with zero duplicates and zero omissions."""
+    n = 200
+    df = pd.DataFrame({
+        "TransactionID": [f"TXN_{i:04d}" for i in range(n)],
+        "TransactionDT": np.repeat(np.arange(100, 150), 4),  # multiple ties
+        "isFraud": np.zeros(n, dtype=int),
+    })
+
+    train_df, val_df, test_df, _ = create_temporal_splits(df, 0.70, 0.15, 0.15)
+
+    all_split_ids = list(train_df["TransactionID"]) + list(val_df["TransactionID"]) + list(test_df["TransactionID"])
+
+    # 1. Total row count matches
+    assert len(all_split_ids) == n
+    # 2. No duplicates across any split
+    assert len(set(all_split_ids)) == n
+    # 3. Exact set equality with original input rows
+    assert set(all_split_ids) == set(df["TransactionID"])
+
+
+def test_premature_test_split_access_guard_raises_error(tmp_path):
+    """Verify that requesting the test split without explicit authorization raises PrematureTestAccessError."""
+    from fraudshield.splits.guard import load_split_parquet, PrematureTestAccessError
+
+    with pytest.raises(PrematureTestAccessError, match="Premature access to the held-out test split is strictly forbidden"):
+        load_split_parquet("test", feature_set="a", allow_test_access=False)
+

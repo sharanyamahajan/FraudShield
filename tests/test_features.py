@@ -125,11 +125,49 @@ def test_train_only_fitting_linear_preprocessor_is_independent_of_val_test():
 
     # Assert training median was learned from train only
     assert prep.numeric_medians_["num1"] == 20.0
-    assert "unseen_cat" not in prep.category_maps_["cat1"]
+    assert "unseen_cat" not in prep.category_freq_maps_["cat1"]
 
     # Transform val
     transformed_val = prep.transform(val_df)
-    # Check that unseen category maps to -1
-    assert transformed_val["cat1"].iloc[1] == -1.0
+    # Check that unseen category maps to 0.0 frequency and is_unseen indicator is 1.0
+    assert transformed_val["cat1_is_unseen"].iloc[1] == 1.0
+    assert transformed_val["cat1_freq"].iloc[1] < 0.0  # (0.0 - mean) / std is negative
     # Check that missing indicator exists
     assert "num1_isna" in transformed_val.columns
+
+
+def test_metadata_and_target_strictly_excluded_from_model_features(mock_transaction_dataframe):
+    """Assert TransactionID, TransactionDT, and isFraud are strictly excluded from model feature sets."""
+    from fraudshield.features.pipeline import get_model_feature_columns, METADATA_AND_TARGET_COLS
+
+    df_a = extract_set_a_raw(mock_transaction_dataframe)
+    df_b = extract_set_b(mock_transaction_dataframe)
+
+    cols_a = get_model_feature_columns(df_a)
+    cols_b = get_model_feature_columns(df_b)
+
+    for forbidden in METADATA_AND_TARGET_COLS:
+        assert forbidden not in cols_a, f"{forbidden} found in Set A model feature columns!"
+        assert forbidden not in cols_b, f"{forbidden} found in Set B model feature columns!"
+
+
+def test_unseen_categories_map_to_reserved_value():
+    """Verify that unseen categories in val/test are mapped to designated reserved values."""
+    train_df = pd.DataFrame({"cat": ["red", "blue", "blue"]})
+    test_df = pd.DataFrame({"cat": ["red", "green", np.nan]})  # 'green' is unseen
+
+    # TreePreprocessor maps unseen -> -1, missing -> -2
+    tree_prep = TreePreprocessor().fit(train_df)
+    tree_res = tree_prep.transform(test_df)
+    assert tree_res["cat"].iloc[0] >= 0  # known category
+    assert tree_res["cat"].iloc[1] == -1.0  # unseen category 'green' mapped to -1
+    assert tree_res["cat"].iloc[2] == -2.0  # missing category mapped to -2
+
+    # LinearPreprocessor maps unseen -> frequency 0.0 and _is_unseen = 1.0
+    linear_prep = LinearPreprocessor().fit(train_df)
+    linear_res = linear_prep.transform(test_df)
+    assert linear_res["cat_is_unseen"].iloc[0] == 0.0  # known
+    assert linear_res["cat_is_unseen"].iloc[1] == 1.0  # unseen 'green'
+    assert linear_res["cat_is_unseen"].iloc[2] == 0.0  # missing is not unseen, it's missing
+    assert linear_res["cat_isna"].iloc[2] == 1.0       # missing flag
+

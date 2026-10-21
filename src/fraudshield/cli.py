@@ -163,9 +163,21 @@ def run_features(args: argparse.Namespace) -> int:
 
 
 def run_train(args: argparse.Namespace) -> int:
-    """Train models across feature sets."""
-    logger.info("Executing 'train' command (Milestones 3 & 5)...")
-    logger.info("Training pipeline entry point ready.")
+    """Train baseline models on Set A and Set B evaluated on validation split (Milestone 3)."""
+    from fraudshield.models.train_baselines import run_validation_baselines
+
+    logger.info("Executing 'train' command (Milestone 3)...")
+    df_results = run_validation_baselines()
+    print("\n" + "=" * 90)
+    print("MILESTONE 3: VALIDATION BASELINE PERFORMANCE SUMMARY")
+    print("=" * 90)
+    display_cols = [
+        "feature_set", "model_name", "variant",
+        "pr_auc", "roc_auc", "recall_top_1.0pct", "precision_top_1.0pct", "fpr_top_1.0pct"
+    ]
+    print(df_results[display_cols].to_string(index=False))
+    print("=" * 90 + "\n")
+    logger.info("Milestone 3 training and validation evaluation complete.")
     return 0
 
 
