@@ -1,0 +1,221 @@
+{
+  "dataset_name": "IEEE-CIS Fraud Detection (Vesta)",
+  "source": "Kaggle Competition (train_transaction.csv + train_identity.csv)",
+  "total_rows": 590540,
+  "total_columns": 434,
+  "identity_rows_raw": 144233,
+  "identity_matches_in_transaction": 140810,
+  "identity_coverage_pct": 23.84,
+  "duplicate_transaction_ids": 0,
+  "target_col": "isFraud",
+  "fraud_count": 20663,
+  "non_fraud_count": 569877,
+  "fraud_rate_pct": 3.499,
+  "time_stats": {
+    "min_transaction_dt": 86400,
+    "max_transaction_dt": 15811131,
+    "span_seconds": 15724731,
+    "span_days": 182.0,
+    "is_strictly_monotonic": false,
+    "is_weakly_monotonic": true,
+    "total_rows": 590540,
+    "unique_timestamps": 573349,
+    "timestamp_tie_rows": 17191,
+    "tie_rate": 0.0291,
+    "max_ties_in_single_second": 8,
+    "tie_handling_rule": "Strict-inequality filtering (T_prior < T_current) ensures transactions occurring at the exact same TransactionDT (ties) do not leak into each other's backward-looking historical features. Secondary sorting by TransactionID provides a deterministic, reproducible row order."
+  },
+  "key_cardinalities": {
+    "card1": 13553,
+    "card2": 500,
+    "card3": 114,
+    "card4": 4,
+    "card5": 119,
+    "card6": 4,
+    "addr1": 332,
+    "addr2": 74,
+    "P_emaildomain": 59,
+    "R_emaildomain": 60,
+    "DeviceType": 2,
+    "DeviceInfo": 1786
+  },
+  "key_missingness": {
+    "card1": {
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    "card2": {
+      "missing_count": 8933,
+      "missing_pct": 1.51
+    },
+    "card3": {
+      "missing_count": 1565,
+      "missing_pct": 0.27
+    },
+    "card4": {
+      "missing_count": 1577,
+      "missing_pct": 0.27
+    },
+    "card5": {
+      "missing_count": 4259,
+      "missing_pct": 0.72
+    },
+    "card6": {
+      "missing_count": 1571,
+      "missing_pct": 0.27
+    },
+    "addr1": {
+      "missing_count": 65706,
+      "missing_pct": 11.13
+    },
+    "addr2": {
+      "missing_count": 65706,
+      "missing_pct": 11.13
+    },
+    "P_emaildomain": {
+      "missing_count": 94456,
+      "missing_pct": 15.99
+    },
+    "R_emaildomain": {
+      "missing_count": 453249,
+      "missing_pct": 76.75
+    },
+    "DeviceType": {
+      "missing_count": 449730,
+      "missing_pct": 76.16
+    },
+    "DeviceInfo": {
+      "missing_count": 471874,
+      "missing_pct": 79.91
+    }
+  },
+  "column_missingness_summary": {
+    "cols_zero_missing": 20,
+    "cols_over_50pct_missing": 214,
+    "top_25_missing": {
+      "id_24": {
+        "missing_count": 585793,
+        "missing_pct": 99.19615944728554
+      },
+      "id_25": {
+        "missing_count": 585408,
+        "missing_pct": 99.13096487960172
+      },
+      "id_07": {
+        "missing_count": 585385,
+        "missing_pct": 99.12707013919464
+      },
+      "id_08": {
+        "missing_count": 585385,
+        "missing_pct": 99.12707013919464
+      },
+      "id_21": {
+        "missing_count": 585381,
+        "missing_pct": 99.12639279303687
+      },
+      "id_26": {
+        "missing_count": 585377,
+        "missing_pct": 99.12571544687913
+      },
+      "id_27": {
+        "missing_count": 585371,
+        "missing_pct": 99.1246994276425
+      },
+      "id_23": {
+        "missing_count": 585371,
+        "missing_pct": 99.1246994276425
+      },
+      "id_22": {
+        "missing_count": 585371,
+        "missing_pct": 99.1246994276425
+      },
+      "dist2": {
+        "missing_count": 552913,
+        "missing_pct": 93.62837403054831
+      },
+      "D7": {
+        "missing_count": 551623,
+        "missing_pct": 93.40992989467267
+      },
+      "id_18": {
+        "missing_count": 545427,
+        "missing_pct": 92.36072069631184
+      },
+      "D13": {
+        "missing_count": 528588,
+        "missing_pct": 89.50926270870728
+      },
+      "D14": {
+        "missing_count": 528353,
+        "missing_pct": 89.46946862193924
+      },
+      "D12": {
+        "missing_count": 525823,
+        "missing_pct": 89.04104717715988
+      },
+      "id_04": {
+        "missing_count": 524216,
+        "missing_pct": 88.76892335828225
+      },
+      "id_03": {
+        "missing_count": 524216,
+        "missing_pct": 88.76892335828225
+      },
+      "D6": {
+        "missing_count": 517353,
+        "missing_pct": 87.60676668811597
+      },
+      "id_33": {
+        "missing_count": 517251,
+        "missing_pct": 87.58949436109323
+      },
+      "id_09": {
+        "missing_count": 515614,
+        "missing_pct": 87.31229044603245
+      },
+      "D8": {
+        "missing_count": 515614,
+        "missing_pct": 87.31229044603245
+      },
+      "id_10": {
+        "missing_count": 515614,
+        "missing_pct": 87.31229044603245
+      },
+      "D9": {
+        "missing_count": 515614,
+        "missing_pct": 87.31229044603245
+      },
+      "id_30": {
+        "missing_count": 512975,
+        "missing_pct": 86.8654113184543
+      },
+      "id_32": {
+        "missing_count": 512954,
+        "missing_pct": 86.86185525112609
+      }
+    }
+  },
+  "entity_analysis": {
+    "card1": {
+      "unique_entities": 13553,
+      "single_transaction_entities": 3444,
+      "single_transaction_pct": 25.41,
+      "multi_transaction_entities": 10109,
+      "multi_transaction_pct": 74.59,
+      "max_txns_per_entity": 14932,
+      "median_txns_per_entity": 4.0,
+      "p95_txns_per_entity": 107.0
+    },
+    "card1_addr1_composite": {
+      "unique_entities": 39974,
+      "single_transaction_entities": 15752,
+      "single_transaction_pct": 39.41,
+      "multi_transaction_entities": 24222,
+      "multi_transaction_pct": 60.59,
+      "max_txns_per_entity": 9928,
+      "median_txns_per_entity": 2.0,
+      "p95_txns_per_entity": 45.0
+    },
+    "decision": "Primary proxy entity key is chosen as 'card1', with '(card1, addr1)' available as a composite proxy. Because no verified account or client ID is provided in IEEE-CIS, card1 acts strictly as an unverified payment instrument proxy. The cardinality shows meaningful recurrence (multi-transaction entities exist), enabling backward-looking velocity and aggregate features under strict T_prior < T_current filtering."
+  }
+}

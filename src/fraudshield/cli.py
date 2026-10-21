@@ -16,10 +16,44 @@ logger = logging.getLogger("fraudshield")
 
 def run_data(args: argparse.Namespace) -> int:
     """Acquire, verify, and join IEEE-CIS dataset."""
+    import json
+    from fraudshield.data.loader import load_raw_dataset, join_and_process, verify_time_properties, save_interim_parquet
+    from fraudshield.data.verify import analyze_dataset, generate_markdown_report
+    import yaml
+    from pathlib import Path
+
     logger.info("Executing 'data' command (Milestone 1)...")
-    logger.info("Checking data paths...")
-    # This will be wired in Milestone 1
-    logger.info("Raw data pipeline entry point ready.")
+    config_path = Path("configs/config.yaml")
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    raw_dir = Path(cfg["paths"]["raw_data_dir"])
+    txn_file = cfg["data"]["raw_transactions"]
+    id_file = cfg["data"]["raw_identity"]
+    output_parquet = Path(cfg["data"]["joined_parquet"])
+    time_col = cfg["data"]["time_col"]
+    id_col = cfg["data"]["id_col"]
+
+    df_txn, df_id = load_raw_dataset(raw_dir, txn_file, id_file)
+    id_len = len(df_id)
+    merged = join_and_process(df_txn, df_id, id_col, time_col)
+    save_interim_parquet(merged, output_parquet)
+
+    logger.info("Computing full data verification statistics on actual dataset...")
+    data_report = analyze_dataset(merged, identity_df_len=id_len, id_col=id_col, time_col=time_col)
+
+    # Save docs/DATA_REPORT.md
+    docs_report_path = Path("docs/DATA_REPORT.md")
+    generate_markdown_report(data_report, docs_report_path)
+
+    # Save reports/data_summary.json
+    summary_path = Path("reports/data_summary.json")
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(data_report, f, indent=2)
+    logger.info("Saved data summary JSON to %s", summary_path)
+
+    logger.info("Milestone 1 data ingestion and verification complete.")
     return 0
 
 
