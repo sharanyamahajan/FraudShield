@@ -22,14 +22,17 @@
 - **Strict Monotonicity**: `False`
 - **Weak Monotonicity (Non-Decreasing)**: `True`
 - **Unique Timestamps**: 573,349
-- **Timestamp Ties (Duplicate Seconds)**: 17,191 rows (2.91%) share a `TransactionDT` with at least one other transaction.
-- **Maximum Concurrent Transactions in a Single Second**: 8
+- **Distinct Timestamps Occurring > 1 Times**: **16,741**
+- **Rows Involved in a Tie**: **33,932** (5.75% of total dataset)
+- **Surplus Timestamp Rows** (Rows minus unique timestamps): **17,191** (2.91%)
+- **Maximum Concurrent Transactions in a Single Second**: **8**
 
 ### Tie-Breaking and Strict-Inequality Rule
 > [!NOTE]
-> Because multiple transactions occur within the exact same second (`TransactionDT` ties), any backward-looking rolling feature MUST strictly enforce:
+> Because 33,932 transactions occur within tied timestamps, any backward-looking rolling feature MUST strictly enforce:
 > $$\text{TransactionDT}_{\text{prior}} < \text{TransactionDT}_{\text{current}}$$
 > A transaction occurring at time $t$ will **never** include other transactions occurring at time $t$ in its history. This ensures that concurrent transactions cannot leak into each other regardless of execution order.
+> Furthermore, in time-ordered train/val/test splits, split boundaries never split inside a group of tied timestamps; the boundary is moved to the next distinct `TransactionDT`.
 > For deterministic processing, rows are sorted by `(TransactionDT, TransactionID)`.
 
 ## 3. Cardinality of Key Columns
@@ -74,25 +77,39 @@
 ## 5. Proxy Entity Key Decision & Justification
 Because IEEE-CIS does not provide genuine account IDs, customer IDs, or authenticated identity numbers, any entity-level aggregation relies on an unverified proxy key.
 
-### Candidate Comparison
-| Metric | `card1` | `(card1, addr1)` Composite |
+### Definition and Nature of `card1`
+`card1` is an anonymised column whose meaning is undocumented. Its largest group has 14,932 transactions, so it is a coarse proxy that may aggregate many cardholders; entity-history features built on it describe group behaviour, not necessarily one person's.
+
+### Entity Key Policy (Fixed)
+- **Primary Proxy Key**: `card1`
+- **Secondary Proxy Key**: `(card1, addr1)` composite
+- No other keys will be added or tested without approval. Both will be reported in Milestone 4.
+
+### Candidate Comparison and Transaction Coverage
+| Metric | `card1` (Primary) | `(card1, addr1)` Composite (Secondary) |
 | :--- | :--- | :--- |
 | Unique Entity Keys | 13,553 | 39,974 |
 | Single-Transaction Entities | 3,444 (25.41%) | 15,752 (39.41%) |
 | Multi-Transaction Entities | 10,109 (74.59%) | 24,222 (60.59%) |
-| Max Transactions per Entity | 14,932 | 9,928 |
-| Median Transactions per Entity | 4.0 | 2.0 |
-| 95th Percentile Txns per Entity | 107.0 | 45.0 |
+| **Share of All Transactions in Entities with $\ge 10$ Txns** | **562,488 (95.25%)** | **510,882 (86.51%)** |
+
+### Entity Transaction Count Percentiles
+| Percentile | `card1` Transactions per Entity | `(card1, addr1)` Transactions per Entity |
+| :--- | :--- | :--- |
+| **Median (50th)** | 4.0 | 2.0 |
+| **75th** | 14.0 | 7.0 |
+| **90th** | 46.0 | 22.0 |
+| **95th** | 107.0 | 45.0 |
+| **99th** | 786.4 | 201.3 |
+| **Max** | 14,932 | 9,928 |
 
 ### Decision Rationale
-- **Primary Proxy Key**: `card1`
-- **Secondary Composite Proxy Key**: `(card1, addr1)`
-- **Justification**: Both keys provide substantial multi-transaction histories for backward-looking aggregations (e.g., velocity over 1h/24h/7d, amount compared to historical entity average). However, `card1` represents the payment card issuer/identifier directly, whereas adding `addr1` splits users who transact from multiple billing regions or during travel. Both options will be supported in configuration (`configs/config.yaml`), with `card1` serving as the baseline proxy entity.
-- **Caveat**: As noted in our project plan, proxy entity keys may be coarse or noisy. If Set C exhibits no gain over Set B in RQ1, this will be reported honestly as an experimental finding.
+1. **High Volume Coverage**: While 25.41% of unique `card1` entities appear only once, **95.25% of all transactions** belong to entities with at least 10 historical events. This confirms that backward-looking rolling features will have prior history for the vast majority of scored transactions.
+2. **Coarse Proxy Awareness**: Because `card1` represents group behavior rather than a single individual, features will capture shared card-bin / portfolio velocity. If Set C exhibits no gain over Set B in RQ1, this will be reported honestly as an experimental finding.
 
 ## 6. Documented Caveats
 1. **`TransactionDT` Offset**: `TransactionDT` is a relative offset in seconds from an unrevealed reference epoch, not a true timestamp. Any 'hour-of-day' feature is an approximation and documented as such.
 2. **Anonymised Features**: Columns C1-C14, D1-D15, M1-M9, and V1-V339 are masked and anonymised by Vesta Corporation. Their underlying business definitions are unknown.
-3. **Unverified Label**: The exact criteria used to flag `isFraud` (e.g. chargeback window, customer dispute, issuer return) are not documented in the dataset files. `isFraud` is treated strictly as provided ground truth.
+3. **Unverified Label**: The exact criteria used to flag `isFraud` (e.g. chargeback window, customer dispute, issuer return) are not documented in the dataset files. `isFraud` is treated strictly as provided ground truth. Any claim about what it represents (e.g. chargebacks) is an assumption and must not appear in results as fact.
 4. **No Account-to-Account Graph**: This dataset contains transaction records and device metadata, but no recipient/merchant account graph. No fraud-ring or mule-network assumptions are made.
-5. **Dataset Licensing**: The dataset was published for an open Kaggle research competition under competition rules. Its commercial licence terms are unverified.
+5. **Dataset Licensing**: The dataset was published for an open Kaggle research competition under competition rules. Its commercial licence terms are unverified. Link: [Kaggle IEEE-CIS Fraud Detection](https://www.kaggle.com/competitions/ieee-fraud-detection).

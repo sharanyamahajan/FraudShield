@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 import subprocess
+import numpy as np
+import pandas as pd
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,9 +60,105 @@ def run_data(args: argparse.Namespace) -> int:
 
 
 def run_features(args: argparse.Namespace) -> int:
-    """Build feature sets A, B, and C."""
-    logger.info("Executing 'features' command (Milestones 2 & 4)...")
-    logger.info("Feature engineering entry point ready.")
+    """Build temporal splits and feature sets A and B (Milestone 2)."""
+    import json
+    from fraudshield.splits.temporal import create_temporal_splits
+    from fraudshield.features.pipeline import extract_set_a_raw, extract_set_b, TreePreprocessor
+    import yaml
+    from pathlib import Path
+
+    logger.info("Executing 'features' command (Milestone 2)...")
+    config_path = Path("configs/config.yaml")
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    interim_path = Path(cfg["data"]["joined_parquet"])
+    if not interim_path.exists():
+        logger.error("Interim parquet not found at %s. Please run 'python -m fraudshield data' first.", interim_path)
+        return 1
+
+    logger.info("Loading joined dataset from %s ...", interim_path)
+    df = pd.read_parquet(interim_path)
+
+    # 1. Temporal Splits
+    logger.info("Generating time-ordered 70/15/15 splits with tied-timestamp protection...")
+    train_df, val_df, test_df, split_summary = create_temporal_splits(
+        df,
+        train_ratio=cfg["splits"]["train_ratio"],
+        val_ratio=cfg["splits"]["val_ratio"],
+        test_ratio=cfg["splits"]["test_ratio"],
+        time_col=cfg["data"]["time_col"],
+        id_col=cfg["data"]["id_col"],
+        target_col=cfg["data"]["target_col"],
+    )
+
+    # Save split summary
+    reports_dir = Path(cfg["paths"]["reports_dir"])
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = reports_dir / "split_summary.json"
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(split_summary, f, indent=2)
+    logger.info("Saved split summary to %s", summary_path)
+
+    # 2. Extract Set A
+    logger.info("Extracting Feature Set A (Transaction-only)...")
+    train_a_raw = extract_set_a_raw(train_df, time_col=cfg["data"]["time_col"])
+    val_a_raw = extract_set_a_raw(val_df, time_col=cfg["data"]["time_col"])
+    test_a_raw = extract_set_a_raw(test_df, time_col=cfg["data"]["time_col"])
+
+    # Fit TreePreprocessor strictly on train_a_raw
+    prep_a = TreePreprocessor()
+    prep_a.fit(train_a_raw)
+    train_a_proc = prep_a.transform(train_a_raw)
+    val_a_proc = prep_a.transform(val_a_raw)
+    test_a_proc = prep_a.transform(test_a_raw)
+
+    # Attach targets and IDs
+    for split_data, proc, raw in [
+        (train_df, train_a_proc, train_a_raw),
+        (val_df, val_a_proc, val_a_raw),
+        (test_df, test_a_proc, test_a_raw),
+    ]:
+        proc["TransactionID"] = split_data[cfg["data"]["id_col"]].values
+        proc["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
+        proc["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
+
+    # 3. Extract Set B
+    logger.info("Extracting Feature Set B (Set A + C/D/M/V + Identity)...")
+    train_b_raw = extract_set_b(train_df, time_col=cfg["data"]["time_col"])
+    val_b_raw = extract_set_b(val_df, time_col=cfg["data"]["time_col"])
+    test_b_raw = extract_set_b(test_df, time_col=cfg["data"]["time_col"])
+
+    prep_b = TreePreprocessor()
+    prep_b.fit(train_b_raw)
+    train_b_proc = prep_b.transform(train_b_raw)
+    val_b_proc = prep_b.transform(val_b_raw)
+    test_b_proc = prep_b.transform(test_b_raw)
+
+    for split_data, proc in [
+        (train_df, train_b_proc),
+        (val_df, val_b_proc),
+        (test_df, test_b_proc),
+    ]:
+        proc["TransactionID"] = split_data[cfg["data"]["id_col"]].values
+        proc["TransactionDT"] = split_data[cfg["data"]["time_col"]].values
+        proc["isFraud"] = split_data[cfg["data"]["target_col"]].values.astype(np.int8)
+
+    # 4. Save to processed directory
+    proc_dir = Path(cfg["paths"]["processed_data_dir"])
+    proc_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info("Saving processed datasets to %s ...", proc_dir)
+    train_a_proc.to_parquet(proc_dir / "train_set_a.parquet", compression="snappy", index=False)
+    val_a_proc.to_parquet(proc_dir / "val_set_a.parquet", compression="snappy", index=False)
+    test_a_proc.to_parquet(proc_dir / "test_set_a.parquet", compression="snappy", index=False)
+
+    train_b_proc.to_parquet(proc_dir / "train_set_b.parquet", compression="snappy", index=False)
+    val_b_proc.to_parquet(proc_dir / "val_set_b.parquet", compression="snappy", index=False)
+    test_b_proc.to_parquet(proc_dir / "test_set_b.parquet", compression="snappy", index=False)
+
+    logger.info("Set A columns: %d | Set B columns: %d", train_a_proc.shape[1], train_b_proc.shape[1])
+    logger.info("Milestone 2 feature pipeline execution complete.")
     return 0
 
 

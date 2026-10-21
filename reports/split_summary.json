@@ -1,0 +1,32 @@
+{
+  "train": {
+    "split": "train",
+    "rows": 413378,
+    "rows_pct": 70.0,
+    "fraud_count": 14538,
+    "fraud_rate_pct": 3.5169,
+    "min_time": 86400,
+    "max_time": 10437996,
+    "time_span_days": 119.81
+  },
+  "val": {
+    "split": "val",
+    "rows": 88581,
+    "rows_pct": 15.0,
+    "fraud_count": 3042,
+    "fraud_rate_pct": 3.4341,
+    "min_time": 10438003,
+    "max_time": 13151840,
+    "time_span_days": 31.41
+  },
+  "test": {
+    "split": "test",
+    "rows": 88581,
+    "rows_pct": 15.0,
+    "fraud_count": 3083,
+    "fraud_rate_pct": 3.4804,
+    "min_time": 13151880,
+    "max_time": 15811131,
+    "time_span_days": 30.78
+  }
+}

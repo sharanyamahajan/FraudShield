@@ -99,9 +99,12 @@ def verify_time_properties(
     is_weakly_monotonic = bool(np.all(times[:-1] <= times[1:]))
 
     total_rows = len(df)
-    unique_times = df[time_col].nunique()
-    tie_count = total_rows - unique_times
-    max_ties_in_single_second = int(df[time_col].value_counts().max())
+    dt_counts = df[time_col].value_counts()
+    unique_times = len(dt_counts)
+    surplus_rows = total_rows - unique_times
+    distinct_timestamps_gt1 = int((dt_counts > 1).sum())
+    tied_rows = int(dt_counts[dt_counts > 1].sum())
+    max_ties_in_single_second = int(dt_counts.max()) if len(dt_counts) > 0 else 0
 
     min_dt = int(df[time_col].min())
     max_dt = int(df[time_col].max())
@@ -117,14 +120,17 @@ def verify_time_properties(
         "is_weakly_monotonic": is_weakly_monotonic,
         "total_rows": total_rows,
         "unique_timestamps": unique_times,
-        "timestamp_tie_rows": tie_count,
-        "tie_rate": round(tie_count / total_rows, 4),
+        "distinct_timestamps_gt1": distinct_timestamps_gt1,
+        "tied_rows": tied_rows,
+        "tied_rows_pct": round(tied_rows / total_rows * 100, 2) if total_rows > 0 else 0.0,
+        "surplus_timestamp_rows": surplus_rows,
         "max_ties_in_single_second": max_ties_in_single_second,
         "tie_handling_rule": (
             "Strict-inequality filtering (T_prior < T_current) ensures transactions "
             "occurring at the exact same TransactionDT (ties) do not leak into each other's "
             "backward-looking historical features. Secondary sorting by TransactionID "
-            "provides a deterministic, reproducible row order."
+            "provides a deterministic, reproducible row order. Split boundaries are adjusted "
+            "to never split inside a group of tied timestamps."
         ),
     }
     return stats

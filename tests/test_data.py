@@ -59,7 +59,7 @@ def test_duplicate_transaction_ids_raise_error():
 
 def test_verify_time_properties_and_ties():
     """Test time span, monotonicity, and tie reporting."""
-    # Data with timestamp tie at 200
+    # Data with timestamp tie at 200 (2 rows tied)
     df = pd.DataFrame({
         "TransactionID": [1, 2, 3, 4],
         "TransactionDT": [100, 200, 200, 350],
@@ -72,7 +72,9 @@ def test_verify_time_properties_and_ties():
     assert stats["is_strictly_monotonic"] is False  # tie at 200
     assert stats["is_weakly_monotonic"] is True
     assert stats["unique_timestamps"] == 3
-    assert stats["timestamp_tie_rows"] == 1
+    assert stats["distinct_timestamps_gt1"] == 1
+    assert stats["tied_rows"] == 2
+    assert stats["surplus_timestamp_rows"] == 1
     assert stats["max_ties_in_single_second"] == 2
     assert "Strict-inequality filtering" in stats["tie_handling_rule"]
 
@@ -86,7 +88,9 @@ def test_strictly_monotonic_series():
     stats = verify_time_properties(df)
     assert stats["is_strictly_monotonic"] is True
     assert stats["is_weakly_monotonic"] is True
-    assert stats["timestamp_tie_rows"] == 0
+    assert stats["distinct_timestamps_gt1"] == 0
+    assert stats["tied_rows"] == 0
+    assert stats["surplus_timestamp_rows"] == 0
     assert stats["max_ties_in_single_second"] == 1
 
 
