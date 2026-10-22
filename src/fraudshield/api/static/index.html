@@ -91,48 +91,78 @@
         <!-- 1. EXECUTIVE OVERVIEW TAB -->
         <div id="tab-overview" class="tab-pane active">
             <div class="disclaimer-box">
-                <strong>Operational Review Philosophy:</strong> Under severe fraud prevalence ($\sim 3.5\%$), transactions are scored to prioritize finite analyst manual review capacity. Terminology strictly reflects review prioritization rather than definitive fraud claims.
+                <strong>Operational Review Philosophy:</strong> Under severe fraud prevalence ($\sim 3.5\%$), transactions are scored to prioritize finite analyst manual review capacity. Terminology strictly reflects review prioritization rather than definitive fraud claims. The API directly serves the <strong>Primary Model (Set C1)</strong> with uncalibrated scores and calibrated probabilities.
             </div>
 
+            <div style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue);">
+                Primary Model (Set C1 - Served by API) Out-of-Time Test Performance:
+            </div>
             <div class="kpi-grid">
                 <div class="card">
-                    <div class="kpi-title">Held-Out Test PR-AUC</div>
-                    <div class="kpi-value" id="kpi-test-prauc">0.4296</div>
-                    <div class="kpi-sub">Baseline Set B (Best Out-of-Time)</div>
+                    <div class="kpi-title">Set C1 Test PR-AUC</div>
+                    <div class="kpi-value" id="kpi-test-prauc">0.4002</div>
+                    <div class="kpi-sub">Primary Model Set C1</div>
                 </div>
                 <div class="card">
-                    <div class="kpi-title">Held-Out Test ROC-AUC</div>
+                    <div class="kpi-title">Set C1 Test ROC-AUC</div>
                     <div class="kpi-value" id="kpi-test-rocauc">0.8748</div>
-                    <div class="kpi-sub">Set C1 Model Discrimination</div>
+                    <div class="kpi-sub">Primary Model Set C1</div>
                 </div>
                 <div class="card">
-                    <div class="kpi-title">Top 1% Review Precision</div>
+                    <div class="kpi-title">Set C1 Top 1% Precision</div>
+                    <div class="kpi-value" style="color: var(--accent-green);">72.7%</div>
+                    <div class="kpi-sub">Rank-based: 644 frauds in 886 alerts (Fixed &theta;: 47.9%, 1,742 alerts)</div>
+                </div>
+                <div class="card">
+                    <div class="kpi-title">Held-Out Test Brier Score</div>
+                    <div class="kpi-value" style="color: var(--accent-amber); font-size: 1.45rem;">0.0290 &rarr; 0.0319</div>
+                    <div class="kpi-sub">Calibration worsened test Brier under drift (Uncal: 0.0290, Cal: 0.0319)</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
+                Baseline Comparison Model (Set B) Out-of-Time Test Performance:
+            </div>
+            <div class="kpi-grid" style="margin-bottom: 2rem;">
+                <div class="card" style="background: rgba(0,0,0,0.2);">
+                    <div class="kpi-title">Set B Test PR-AUC</div>
+                    <div class="kpi-value">0.4296</div>
+                    <div class="kpi-sub">Baseline Model Set B</div>
+                </div>
+                <div class="card" style="background: rgba(0,0,0,0.2);">
+                    <div class="kpi-title">Set B Test ROC-AUC</div>
+                    <div class="kpi-value">0.8705</div>
+                    <div class="kpi-sub">Baseline Model Set B</div>
+                </div>
+                <div class="card" style="background: rgba(0,0,0,0.2);">
+                    <div class="kpi-title">Set B Top 1% Precision</div>
                     <div class="kpi-value" style="color: var(--accent-green);">86.0%</div>
-                    <div class="kpi-sub">860 true frauds per 1,000 alerts</div>
+                    <div class="kpi-sub">Rank-based: 860 true frauds per 1,000 alerts</div>
                 </div>
-                <div class="card">
-                    <div class="kpi-title">Brier Calibration Score</div>
-                    <div class="kpi-value" style="color: var(--accent-blue);">0.0218</div>
-                    <div class="kpi-sub">Isotonic probability calibration</div>
+                <div class="card" style="background: rgba(0,0,0,0.2);">
+                    <div class="kpi-title">Set B Test Brier Score</div>
+                    <div class="kpi-value">0.0268</div>
+                    <div class="kpi-sub">Uncalibrated baseline out-of-time</div>
                 </div>
             </div>
 
             <div class="grid-2">
                 <div class="card">
                     <h3 style="font-size: 1rem; font-weight: 600;">Manual Review Capacity vs. Fraud Capture</h3>
-                    <p style="font-size: 0.775rem; color: var(--text-secondary);">Fraud capture rate across operational review tiers on the held-out test split.</p>
+                    <p style="font-size: 0.775rem; color: var(--text-secondary);">Fraud capture rate across operational review tiers on the held-out test split. Validation thresholds flag 515 rows (~0.58%) at 0.5% tier and 1,742 rows (~1.97%) at 1.0% tier.</p>
                     <div class="chart-box">
                         <canvas id="overviewBudgetChart"></canvas>
                     </div>
                 </div>
                 <div class="card">
-                    <h3 style="font-size: 1rem; font-weight: 600;">Operational Review Tiers (Test Split)</h3>
+                    <h3 style="font-size: 1rem; font-weight: 600;">Operational Review Tiers (Set C1 on Test Split)</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>Review Tier</th>
-                                <th>Capacity Cutoff</th>
-                                <th>Frauds Captured</th>
+                                <th>Validation Cutoff (&theta;)</th>
+                                <th>Test Flagged Volume</th>
+                                <th>Frauds Caught</th>
                                 <th>Recall</th>
                                 <th>Precision</th>
                             </tr>
@@ -140,28 +170,32 @@
                         <tbody id="overviewTableBody">
                             <tr>
                                 <td><span class="tag tag-red">Top 0.5% Priority</span></td>
-                                <td>$\ge 0.8684$</td>
+                                <td>&ge; 0.8684</td>
+                                <td>515 (~0.58%)</td>
                                 <td>486</td>
                                 <td>15.76%</td>
                                 <td>94.37%</td>
                             </tr>
                             <tr>
                                 <td><span class="tag tag-amber">Top 1.0% High Risk</span></td>
-                                <td>$\ge 0.6139$</td>
+                                <td>&ge; 0.6139</td>
+                                <td>1,742 (~1.97%)</td>
                                 <td>835</td>
                                 <td>27.08%</td>
                                 <td>47.93%</td>
                             </tr>
                             <tr>
                                 <td><span class="tag tag-green">Top 2.0% Secondary</span></td>
-                                <td>$\ge 0.2665$</td>
+                                <td>&ge; 0.2665</td>
+                                <td>3,503 (~3.95%)</td>
                                 <td>1,278</td>
                                 <td>41.45%</td>
                                 <td>36.48%</td>
                             </tr>
                             <tr>
                                 <td><span class="tag">Top 5.0% Elevated</span></td>
-                                <td>$\ge 0.1154$</td>
+                                <td>&ge; 0.1154</td>
+                                <td>6,670 (~7.53%)</td>
                                 <td>1,791</td>
                                 <td>58.09%</td>
                                 <td>26.85%</td>
@@ -381,7 +415,7 @@
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Top 0.5% Priority', 'Top 1.0% High Risk', 'Top 2.0% Secondary', 'Top 5.0% Elevated'],
+                    labels: ['Top 0.5% (515 rows, ~0.58%)', 'Top 1.0% (1,742 rows, ~1.97%)', 'Top 2.0% (3,503 rows, ~3.95%)', 'Top 5.0% (6,670 rows, ~7.53%)'],
                     datasets: [
                         {
                             label: 'Fraud Capture Rate (Recall %)',

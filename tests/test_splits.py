@@ -185,4 +185,25 @@ def test_static_analysis_no_unauthorized_module_references_test_split():
     assert not violations, f"Unauthorized test split references found: {violations}"
 
 
+def test_real_test_access_log_contains_no_temp_or_pytest_entries():
+    """Assert that the tracked reports/test_access_log.txt contains only real production
+
+    test split accesses and zero pytest, temporary fixture, or tmp paths.
+    """
+    log_file = Path("reports/test_access_log.txt")
+    if not log_file.exists():
+        pytest.skip("reports/test_access_log.txt does not exist yet")
+
+    lines = log_file.read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) > 0, "test_access_log.txt is empty"
+
+    for idx, line in enumerate(lines, start=1):
+        line_lower = line.lower()
+        assert "pytest" not in line_lower, f"Line {idx} in test_access_log.txt contains 'pytest': {line}"
+        assert "temp" not in line_lower, f"Line {idx} in test_access_log.txt contains 'temp': {line}"
+        assert "tmp" not in line_lower, f"Line {idx} in test_access_log.txt contains 'tmp': {line}"
+        assert "target=data/processed/test_set_" in line, f"Line {idx} does not target real test parquet: {line}"
+
+
+
 

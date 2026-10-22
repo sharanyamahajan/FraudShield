@@ -43,9 +43,11 @@ Following the Model Cards for Model Reporting framework (Mitchell et al., 2019).
 ### Out-of-Time Test Performance ($N=88,581$):
 - **Test PR-AUC**: `0.400179` (Set C1) vs `0.429595` (Baseline Set B).
 - **Test ROC-AUC**: `0.874754` (Set C1) vs `0.870473` (Set B).
-- **Test Brier Score**: `0.029021` (uncalibrated) vs `0.031882` (calibrated with Isotonic regression fit on validation); the calibration effect on test is small.
-- **Top 0.5% Capacity Tier**: Cutoff $\ge 0.8684$ $\rightarrow$ 94.37% Precision, 15.76% Fraud Capture Rate (FPR = 0.03%).
-- **Top 1.0% Capacity Tier**: Cutoff $\ge 0.6139$ $\rightarrow$ 47.93% Precision, 27.08% Fraud Capture Rate (FPR = 1.06%).
+- **Test Brier Score**: `0.029021` (uncalibrated) vs `0.031882` (calibrated with Isotonic regression fit on validation); calibration worsened test Brier under out-of-time drift (effect is small: +0.00286).
+- **Served Model**: The production API serves Model Set C1 with both raw scores and calibrated probabilities.
+- **Top 0.5% Capacity Tier**: Validation Cutoff $\ge 0.8684$ $\rightarrow$ flags 515 transactions (~0.58% of test), capturing 486 frauds with 94.37% Precision, 15.76% Fraud Capture Rate (FPR = 0.03%).
+- **Top 1.0% Capacity Tier**: Validation Cutoff $\ge 0.6139$ $\rightarrow$ flags 1,742 transactions (~1.97% of test), capturing 835 frauds with 47.93% Precision, 27.08% Fraud Capture Rate (FPR = 1.06%).
+- **Rank-Based vs. Threshold-Based Precision**: Under exact rank-based manual review (top 886 alerts), Baseline Set B achieved 86.00% precision and Set C1 achieved 72.69% precision. When evaluated at fixed validation thresholds, distribution drift expanded alert volume to 1,742 (~1.97%), yielding 47.93% precision.
 - **Val-to-Test Swing**: The swing in relative performance from validation (+0.0027) to test (-0.0294) is treated as a hypothesis (entity drift), not a definitive finding.
 - **RQ2 Generalization Gap**: Random 70/15 splitting overstates PR-AUC by **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)**, which shows (single dataset) the danger of non-temporal evaluation.
 

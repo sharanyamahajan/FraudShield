@@ -43,8 +43,17 @@ This document details critical real-world limitations, failure modes, and deploy
 ## 6. Discrepancy Analysis, Audit Trail & Backtest Structure
 
 ### 6.1 Set B PR-AUC Discrepancy: 0.5610 (M3/M4) vs. 0.5222 (M5)
-- **Technical Cause**: In Milestones 3 and 4, models were trained using the scikit-learn API `xgb.XGBClassifier` (which defaults to `objective="binary:logistic"` optimizing log-loss cross-entropy) and ingested raw pandas DataFrames with object columns. In Milestone 5, to overcome RAM exhaustion and achieve 5x training acceleration, training transitioned to the lower-level `xgb.train` API with pre-encoded contiguous `float32` DMatrix inputs. In `xgb.train`, omitting the `objective` parameter defaults to `reg:squarederror` (optimizing mean squared error on $\{0, 1\}$ targets rather than log-loss).
-- **Internal Validity**: Because Set B (0.5222), Set C1 (0.5250), and Set C2 (0.5147) were all trained under the identical `xgb.train` objective and matrix formatting in Milestone 5, the comparative evaluation remains controlled and valid.
+- **Technical Cause (Unintended Deviation)**: In Milestones 3 and 4, models were trained using `xgb.XGBClassifier`, which defaults to `objective="binary:logistic"` optimizing log-loss cross-entropy. In Milestone 5, to overcome peak RAM bloat and achieve 5x training acceleration with contiguous `float32` DMatrix arrays, the script switched to the low-level `xgb.train` API. Omitting the `objective` parameter in `xgb.train` caused XGBoost to default to `reg:squarederror` (optimizing mean squared error on $\{0, 1\}$ targets). **This was an unintended deviation, not an intentional speed optimization.**
+- **Validation Score Impact**: The M3/M4 logistic models scored higher on validation (`0.5610` for Set B and `0.5675` for Set C1) than the squared-error models (`0.5222` for Set B and `0.5250` for Set C1).
+- **Validation-Only Logistic Recomputation**: A follow-up validation-only benchmark (`reports/validation_logistic_benchmark.json`) confirmed this discrepancy. Re-running Set B and Set C1 with `objective="binary:logistic"` under identical hyperparameters restored validation PR-AUC to `0.561701` for Set B and `0.569598` for Set C1.
+- **Side-by-Side Validation 95% Confidence Intervals (500 Resamples, C1 - B)**:
+  - `reg:squarederror` (M5 Production Run): $\Delta \text{PR-AUC} = +0.002740$, 95% CI: **`[-0.000483, +0.005893]`** (spans zero).
+  - `binary:logistic` (Audit Run): $\Delta \text{PR-AUC} = +0.007898$, 95% CI: **`[+0.004832, +0.011221]`** (strictly positive).
+  - *Operational Recall*: Even under `binary:logistic`, at the top 1.0% review budget, $\Delta \text{Recall@1.0\%} = -0.002630$ (95% CI `[-0.006008, +0.000340]`), confirming that entity history did not improve fraud capture at operational review capacity.
+  - *RQ2 Gap with Logistic*: Random split Set B achieved `0.695991` vs. Temporal Set B `0.561701`, yielding a **+13.43 percentage point overstatement** (+0.134290).
+- **Deployed Models & Clipping**:
+  - The downstream test evaluation, API, SHAP, and calibration utilize `models/xgb_set_c1.json` (Set C1) and `models/xgb_set_b.json` (Set B baseline), which were trained under `reg:squarederror`.
+  - In both `scripts/evaluate_test.py` and `src/fraudshield/api/main.py`, raw scores are explicitly clipped to $[0, 1]$ (`np.clip(score, 1e-6, 1.0 - 1e-6)`) before calibration and Brier evaluation.
 
 ### 6.2 Execution Script Commit Audit
 - `docs/ANALYSIS_PLAN.md` was registered and committed at commit `8542751` **before** executing M5 experiments.

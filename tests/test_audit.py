@@ -80,3 +80,32 @@ def test_operating_points_numbers_match_csv(report_data):
     assert thresh_05 in html_text
     assert rec_05 in readme_text
     assert rec_05 in html_text
+
+
+def test_dashboard_kpis_do_not_mix_models():
+    """Verify that KPI grids in index.html do not mix metrics from different models in the same grid."""
+    html_text = Path("src/fraudshield/api/static/index.html").read_text(encoding="utf-8")
+
+    # Split by kpi-grid
+    grids = html_text.split('<div class="kpi-grid"')
+    assert len(grids) >= 3, "Expected at least 2 KPI grids in overview"
+
+    # Grid 1: Primary Model (Set C1)
+    grid_c1 = grids[1].split('</div>\n            </div>')[0]
+    assert "Set C1 Test PR-AUC" in grid_c1
+    assert "Set C1 Test ROC-AUC" in grid_c1
+    assert "0.4002" in grid_c1
+    assert "0.8748" in grid_c1
+    # Must NOT contain Set B numbers in this C1 grid
+    assert "0.4296" not in grid_c1, "Grid 1 mistakenly mixed Set B PR-AUC into Set C1 grid"
+    assert "0.8705" not in grid_c1, "Grid 1 mistakenly mixed Set B ROC-AUC into Set C1 grid"
+
+    # Grid 2: Baseline Model (Set B)
+    grid_b = grids[2].split('</div>\n            </div>')[0]
+    assert "Set B Test PR-AUC" in grid_b
+    assert "Set B Test ROC-AUC" in grid_b
+    assert "0.4296" in grid_b
+    assert "0.8705" in grid_b
+    # Must NOT contain Set C1 PR-AUC in this Set B grid
+    assert "0.4002" not in grid_b, "Grid 2 mistakenly mixed Set C1 PR-AUC into Set B grid"
+

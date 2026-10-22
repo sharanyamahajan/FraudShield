@@ -17,7 +17,13 @@ FraudShield is an institutional-grade machine learning system designed for finan
   - On Validation ($N=88,581$): Paired bootstrap 95% CI for $\Delta \text{PR-AUC}$ was `[-0.0005, +0.0059]` (includes 0).
   - On Held-Out Test ($N=88,581$): Baseline **Set B achieved PR-AUC = 0.4296** vs **Set C1 PR-AUC = 0.4002** ($\Delta = -0.0294$, 95% CI: `[-0.0345, -0.0243]`).
   - **Val-to-Test Swing Interpretation**: The performance drop from validation (+0.0027) to test (-0.0294) is treated as a hypothesis (potential entity count distribution drift over time), not a definitive finding.
-  - **Probability Calibration on Test**: Brier score shifted from 0.0290 (uncalibrated) to 0.0319 (isotonic calibrator fit on validation only); the calibration effect on test is small.
+  - **Probability Calibration on Test**: Calibration worsened test Brier score from 0.0290 (uncalibrated) to 0.0319 (isotonic calibrator fit on validation only) under out-of-time distribution drift; the effect is small (+0.00286).
+  - **Served Model**: The API serves the Primary Model (Set C1) with raw scores and calibrated probabilities.
+
+### 2. Research Question 2 (RQ2): Temporal vs. Random Split Degradation
+- **Question**: How much does standard random cross-validation overstate performance versus realistic chronological splitting?
+- **Empirical Result**: **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)** overstatement.
+- **Conclusion**: Random train/val splitting creates massive optimistic leakage due to future-to-past entity lookahead. This shows (single dataset) that temporal evaluation is essential for production fraud risk estimation.
 
 ### 2. Research Question 2 (RQ2): Temporal vs. Random Split Degradation
 - **Question**: How much does standard random cross-validation overstate performance versus realistic chronological splitting?
@@ -72,14 +78,21 @@ uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000 --reload
 
 ## 📊 Operational Review Budget Operating Points
 
-Operating points are fixed on Validation and evaluated on the held-out Test split:
+Operating points are fixed on Validation ($\theta$) and evaluated on the held-out Test split ($N=88,581$, 3,083 actual frauds):
 
-| Operational Tier | Cutoff ($\theta$) | Test Review Count | Frauds Caught | Fraud Capture (Recall) | Alert Precision | False Positive Rate |
+| Operational Tier | Validation Cutoff ($\theta$) | Test Flagged Count & Share | Frauds Caught | Fraud Capture (Recall) | Alert Precision (Threshold-Based) | False Positive Rate |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Top 0.5% Priority** | $\ge 0.8684$ | 515 | 486 | **15.76%** | **94.37%** | 0.03% |
-| **Top 1.0% High Risk** | $\ge 0.6139$ | 1,742 | 835 | **27.08%** | **47.93%** | 1.06% |
-| **Top 2.0% Secondary** | $\ge 0.2665$ | 3,503 | 1,278 | **41.45%** | **36.48%** | 2.60% |
-| **Top 5.0% Elevated** | $\ge 0.1154$ | 6,670 | 1,791 | **58.09%** | **26.85%** | 5.71% |
+| **Top 0.5% Priority** | $\ge 0.8684$ | 515 (~0.58%) | 486 | **15.76%** | **94.37%** | 0.03% |
+| **Top 1.0% High Risk** | $\ge 0.6139$ | 1,742 (~1.97%) | 835 | **27.08%** | **47.93%** | 1.06% |
+| **Top 2.0% Secondary** | $\ge 0.2665$ | 3,503 (~3.95%) | 1,278 | **41.45%** | **36.48%** | 2.60% |
+| **Top 5.0% Elevated** | $\ge 0.1154$ | 6,670 (~7.53%) | 1,791 | **58.09%** | **26.85%** | 5.71% |
+
+> **Rank-Based vs. Threshold-Based Precision Confirmation**:
+> - **Rank-Based Precision** (reviewing strictly the top $N \times b$ transactions by descending risk score):
+>   - Baseline Set B at top 1.0% capacity (top 886 transactions): **86.00% precision** (860 true frauds).
+>   - Primary Set C1 at top 1.0% capacity (top 886 transactions): **72.69% precision** (644 true frauds).
+> - **Threshold-Based Precision** (flagging all transactions with score $\ge \theta$ determined on validation):
+>   - Because score distributions shifted out-of-time on the test split, the validation cutoff $\theta \ge 0.6139$ flagged **1,742 transactions (~1.97% volume)** instead of 886, capturing 835 frauds with **47.93% precision**.
 
 ---
 
