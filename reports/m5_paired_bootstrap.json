@@ -1,0 +1,138 @@
+{
+  "run_id": "0f15c8f9",
+  "git_commit_hash": "8542751",
+  "is_git_dirty": true,
+  "parquet_sha256": {
+    "train_set_b": "181111cc6c73145b0692ffb82923b752590eb3214876fb27321c99dfe54e4d14",
+    "val_set_b": "12596c6139e556ee844d80fedc96a98f27b1a6e23bdbf56e8d67050d8ef73287",
+    "train_set_c1": "242d1303e8be628feeb19ecace47046eecb7457a696467f2ec3b2fbeadc5e13f",
+    "val_set_c1": "fc843653fea6e810f1219e28d61db2c212b64c8844e914af5cd2844e734a3223",
+    "train_set_c2": "96923f040d9ce8b22ac4176e1bee56821ea73ced2b11e4756008f63d387cdb84",
+    "val_set_c2": "b3dc34b962cd02dd86e7db63d85e6df252bc8e900f64cda529554788bedefc86"
+  },
+  "n_bootstraps": 500,
+  "seed": 42,
+  "validation_samples": 88581,
+  "validation_frauds": 3042,
+  "c1_minus_b": {
+    "pr_auc": {
+      "point_estimate": 0.00274,
+      "mean_diff": 0.002761,
+      "std_error": 0.001631,
+      "ci_95_lower": -0.000483,
+      "ci_95_upper": 0.005893,
+      "strictly_positive": false
+    },
+    "roc_auc": {
+      "point_estimate": -0.001457,
+      "mean_diff": -0.001458,
+      "std_error": 0.001319,
+      "ci_95_lower": -0.003935,
+      "ci_95_upper": 0.000967,
+      "strictly_positive": false
+    },
+    "recall_top_0.5pct": {
+      "point_estimate": 0.000329,
+      "mean_diff": 0.000264,
+      "std_error": 0.000908,
+      "ci_95_lower": -0.001355,
+      "ci_95_upper": 0.001959,
+      "strictly_positive": false
+    },
+    "recall_top_1.0pct": {
+      "point_estimate": -0.000329,
+      "mean_diff": 0.000106,
+      "std_error": 0.001487,
+      "ci_95_lower": -0.002887,
+      "ci_95_upper": 0.002781,
+      "strictly_positive": false
+    },
+    "recall_top_2.0pct": {
+      "point_estimate": 0.004274,
+      "mean_diff": 0.00507,
+      "std_error": 0.003049,
+      "ci_95_lower": -0.000962,
+      "ci_95_upper": 0.011315,
+      "strictly_positive": false
+    },
+    "recall_top_5.0pct": {
+      "point_estimate": 0.004273,
+      "mean_diff": 0.003639,
+      "std_error": 0.00345,
+      "ci_95_lower": -0.003126,
+      "ci_95_upper": 0.01053,
+      "strictly_positive": false
+    }
+  },
+  "c2_minus_b": {
+    "pr_auc": {
+      "point_estimate": -0.007524,
+      "mean_diff": -0.00757,
+      "std_error": 0.001486,
+      "ci_95_lower": -0.010476,
+      "ci_95_upper": -0.004586,
+      "strictly_positive": false
+    },
+    "roc_auc": {
+      "point_estimate": -0.002092,
+      "mean_diff": -0.002116,
+      "std_error": 0.001083,
+      "ci_95_lower": -0.004038,
+      "ci_95_upper": -2.1e-05,
+      "strictly_positive": false
+    },
+    "recall_top_0.5pct": {
+      "point_estimate": 0.001644,
+      "mean_diff": 0.001362,
+      "std_error": 0.000902,
+      "ci_95_lower": -0.000328,
+      "ci_95_upper": 0.003041,
+      "strictly_positive": false
+    },
+    "recall_top_1.0pct": {
+      "point_estimate": -0.001644,
+      "mean_diff": -0.001102,
+      "std_error": 0.00132,
+      "ci_95_lower": -0.003607,
+      "ci_95_upper": 0.001923,
+      "strictly_positive": false
+    },
+    "recall_top_2.0pct": {
+      "point_estimate": -0.006246,
+      "mean_diff": -0.005178,
+      "std_error": 0.002732,
+      "ci_95_lower": -0.010059,
+      "ci_95_upper": 0.000329,
+      "strictly_positive": false
+    },
+    "recall_top_5.0pct": {
+      "point_estimate": -0.00789,
+      "mean_diff": -0.00828,
+      "std_error": 0.003334,
+      "ci_95_lower": -0.014296,
+      "ci_95_upper": -0.001997,
+      "strictly_positive": false
+    }
+  },
+  "reduced_scope_metadata": {
+    "seeds_evaluated": [
+      42,
+      123,
+      7
+    ],
+    "seeds_count": 3,
+    "bootstrap_resamples": 500,
+    "rolling_backtest_folds": 2,
+    "hyperparameters": {
+      "max_depth": 6,
+      "learning_rate": 0.05,
+      "n_estimators": 300,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "tree_method": "hist",
+      "n_jobs": 6,
+      "early_stopping_rounds": 30
+    },
+    "rationale": "Execution scope optimized under 100-minute budget per explicit instructions. Retained identical hyperparameters."
+  }
+}

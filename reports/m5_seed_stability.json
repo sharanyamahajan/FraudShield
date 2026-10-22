@@ -1,0 +1,145 @@
+{
+  "run_id": "0f15c8f9",
+  "git_commit_hash": "8542751",
+  "is_git_dirty": true,
+  "parquet_sha256": {
+    "train_set_b": "181111cc6c73145b0692ffb82923b752590eb3214876fb27321c99dfe54e4d14",
+    "val_set_b": "12596c6139e556ee844d80fedc96a98f27b1a6e23bdbf56e8d67050d8ef73287",
+    "train_set_c1": "242d1303e8be628feeb19ecace47046eecb7457a696467f2ec3b2fbeadc5e13f",
+    "val_set_c1": "fc843653fea6e810f1219e28d61db2c212b64c8844e914af5cd2844e734a3223",
+    "train_set_c2": "96923f040d9ce8b22ac4176e1bee56821ea73ced2b11e4756008f63d387cdb84",
+    "val_set_c2": "b3dc34b962cd02dd86e7db63d85e6df252bc8e900f64cda529554788bedefc86"
+  },
+  "summary": [
+    {
+      "feature_set": "Set B",
+      "seeds_count": 1,
+      "pr_auc_mean": 0.522243,
+      "pr_auc_std": 0.0,
+      "roc_auc_mean": 0.883476,
+      "roc_auc_std": 0.0,
+      "recall_top_1.0pct_mean": 0.263971,
+      "recall_top_1.0pct_std": 0.0,
+      "recall_top_2.0pct_mean": 0.404339,
+      "recall_top_2.0pct_std": 0.0,
+      "recall_top_5.0pct_mean": 0.560158,
+      "recall_top_5.0pct_std": 0.0
+    },
+    {
+      "feature_set": "Set C1",
+      "seeds_count": 1,
+      "pr_auc_mean": 0.524983,
+      "pr_auc_std": 0.0,
+      "roc_auc_mean": 0.882018,
+      "roc_auc_std": 0.0,
+      "recall_top_1.0pct_mean": 0.263642,
+      "recall_top_1.0pct_std": 0.0,
+      "recall_top_2.0pct_mean": 0.408613,
+      "recall_top_2.0pct_std": 0.0,
+      "recall_top_5.0pct_mean": 0.564431,
+      "recall_top_5.0pct_std": 0.0
+    },
+    {
+      "feature_set": "Set C2",
+      "seeds_count": 1,
+      "pr_auc_mean": 0.514718,
+      "pr_auc_std": 0.0,
+      "roc_auc_mean": 0.881384,
+      "roc_auc_std": 0.0,
+      "recall_top_1.0pct_mean": 0.262327,
+      "recall_top_1.0pct_std": 0.0,
+      "recall_top_2.0pct_mean": 0.398093,
+      "recall_top_2.0pct_std": 0.0,
+      "recall_top_5.0pct_mean": 0.552268,
+      "recall_top_5.0pct_std": 0.0
+    }
+  ],
+  "all_runs": [
+    {
+      "feature_set": "Set B",
+      "seed": 42,
+      "pr_auc": 0.522243,
+      "roc_auc": 0.883476,
+      "brier_score": 0.022208,
+      "best_iteration": 293,
+      "fit_time_seconds": 329.85,
+      "recall_top_0.5pct": 0.137081,
+      "precision_top_0.5pct": 0.941309,
+      "fpr_top_0.5pct": 0.000304,
+      "recall_top_1.0pct": 0.263971,
+      "precision_top_1.0pct": 0.906321,
+      "fpr_top_1.0pct": 0.00097,
+      "recall_top_2.0pct": 0.404339,
+      "precision_top_2.0pct": 0.694131,
+      "fpr_top_2.0pct": 0.006336,
+      "recall_top_5.0pct": 0.560158,
+      "precision_top_5.0pct": 0.384737,
+      "fpr_top_5.0pct": 0.031857
+    },
+    {
+      "feature_set": "Set C1",
+      "seed": 42,
+      "pr_auc": 0.524983,
+      "roc_auc": 0.882018,
+      "brier_score": 0.022124,
+      "best_iteration": 299,
+      "fit_time_seconds": 406.66,
+      "recall_top_0.5pct": 0.13741,
+      "precision_top_0.5pct": 0.943567,
+      "fpr_top_0.5pct": 0.000292,
+      "recall_top_1.0pct": 0.263642,
+      "precision_top_1.0pct": 0.905192,
+      "fpr_top_1.0pct": 0.000982,
+      "recall_top_2.0pct": 0.408613,
+      "precision_top_2.0pct": 0.701467,
+      "fpr_top_2.0pct": 0.006184,
+      "recall_top_5.0pct": 0.564431,
+      "precision_top_5.0pct": 0.387672,
+      "fpr_top_5.0pct": 0.031705
+    },
+    {
+      "feature_set": "Set C2",
+      "seed": 42,
+      "pr_auc": 0.514718,
+      "roc_auc": 0.881384,
+      "brier_score": 0.022391,
+      "best_iteration": 299,
+      "fit_time_seconds": 440.61,
+      "recall_top_0.5pct": 0.138725,
+      "precision_top_0.5pct": 0.952596,
+      "fpr_top_0.5pct": 0.000246,
+      "recall_top_1.0pct": 0.262327,
+      "precision_top_1.0pct": 0.900677,
+      "fpr_top_1.0pct": 0.001029,
+      "recall_top_2.0pct": 0.398093,
+      "precision_top_2.0pct": 0.683409,
+      "fpr_top_2.0pct": 0.006558,
+      "recall_top_5.0pct": 0.552268,
+      "precision_top_5.0pct": 0.379318,
+      "fpr_top_5.0pct": 0.032137
+    }
+  ],
+  "reduced_scope_metadata": {
+    "seeds_evaluated": [
+      42
+    ],
+    "seeds_count": 1,
+    "bootstrap_resamples": 500,
+    "rolling_backtest_folds": 2,
+    "dropped_items": [
+      "(d) seeds 123 and 7",
+      "(f) C1 sensitivity run"
+    ],
+    "dropped_rationale": "Dropped per priority order in rule 5 and user explicit instruction to finish within 10 minutes for presentation.",
+    "hyperparameters": {
+      "max_depth": 6,
+      "learning_rate": 0.05,
+      "n_estimators": 300,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "tree_method": "hist",
+      "n_jobs": 6,
+      "early_stopping_rounds": 30
+    }
+  }
+}
