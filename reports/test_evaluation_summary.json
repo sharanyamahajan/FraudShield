@@ -1,0 +1,238 @@
+{
+  "run_id": "m6_final_eval",
+  "git_commit_hash": "1870501",
+  "is_git_dirty": true,
+  "parquet_sha256": {
+    "train_set_b": "181111cc6c73145b0692ffb82923b752590eb3214876fb27321c99dfe54e4d14",
+    "val_set_b": "12596c6139e556ee844d80fedc96a98f27b1a6e23bdbf56e8d67050d8ef73287",
+    "test_set_b": "d1204ef86576b0b7b5ff956f8b76ecaf5ae8eea2ff145b5944019a08f72c379a",
+    "train_set_c1": "242d1303e8be628feeb19ecace47046eecb7457a696467f2ec3b2fbeadc5e13f",
+    "val_set_c1": "fc843653fea6e810f1219e28d61db2c212b64c8844e914af5cd2844e734a3223",
+    "test_set_c1": "c84f6e45d843552d6cbc974c6667495a8a343fb97fee3338e00e527a7a52c707"
+  },
+  "calibrator": {
+    "type": "IsotonicRegression",
+    "val_brier_uncalibrated": 0.022124266251921654,
+    "val_brier_calibrated": 0.021785255521535873,
+    "test_brier_uncalibrated": 0.029020581394433975,
+    "test_brier_calibrated": 0.03188240900635719
+  },
+  "primary_model_set_c1": {
+    "test_pr_auc": 0.400179,
+    "test_roc_auc": 0.874754,
+    "val_pr_auc": 0.524983,
+    "val_roc_auc": 0.882018,
+    "best_iteration": 299
+  },
+  "baseline_model_set_b": {
+    "test_pr_auc": 0.429595,
+    "test_roc_auc": 0.870473,
+    "best_iteration": 293
+  },
+  "test_paired_bootstrap_c1_minus_b": {
+    "pr_auc": {
+      "point_estimate": -0.029415,
+      "mean_diff": -0.029168,
+      "std_error": 0.002572,
+      "ci_95_lower": -0.034452,
+      "ci_95_upper": -0.024337,
+      "strictly_positive": false
+    },
+    "roc_auc": {
+      "point_estimate": 0.004281,
+      "mean_diff": 0.004295,
+      "std_error": 0.001389,
+      "ci_95_lower": 0.001514,
+      "ci_95_upper": 0.007026,
+      "strictly_positive": true
+    },
+    "recall_top_0.5pct": {
+      "point_estimate": 0.0,
+      "mean_diff": -0.000354,
+      "std_error": 0.001208,
+      "ci_95_lower": -0.00285,
+      "ci_95_upper": 0.001916,
+      "strictly_positive": false
+    },
+    "recall_top_1.0pct": {
+      "point_estimate": -0.038275,
+      "mean_diff": -0.037978,
+      "std_error": 0.006871,
+      "ci_95_lower": -0.051147,
+      "ci_95_upper": -0.025757,
+      "strictly_positive": false
+    },
+    "recall_top_2.0pct": {
+      "point_estimate": -0.037626,
+      "mean_diff": -0.037116,
+      "std_error": 0.004474,
+      "ci_95_lower": -0.045089,
+      "ci_95_upper": -0.027942,
+      "strictly_positive": false
+    },
+    "recall_top_5.0pct": {
+      "point_estimate": 0.008109,
+      "mean_diff": 0.00749,
+      "std_error": 0.003236,
+      "ci_95_lower": 0.001291,
+      "ci_95_upper": 0.013243,
+      "strictly_positive": true
+    }
+  },
+  "operating_points": [
+    {
+      "budget_name": "top_0.5pct",
+      "budget_ratio": 0.005,
+      "val_fixed_threshold": 0.8684440851211548,
+      "val_recall": 0.13741,
+      "val_precision": 0.943567,
+      "test_fixed_threshold_recall": 0.157639,
+      "test_fixed_threshold_precision": 0.943689,
+      "test_fixed_threshold_fpr": 0.000339,
+      "test_fixed_threshold_review_count": 515,
+      "test_fixed_threshold_fraud_captured": 486,
+      "test_fixed_budget_recall": 0.135907,
+      "test_fixed_budget_precision": 0.945824,
+      "test_fixed_budget_fpr": 0.000281,
+      "test_fixed_budget_review_count": 443,
+      "test_fixed_budget_fraud_captured": 419
+    },
+    {
+      "budget_name": "top_1.0pct",
+      "budget_ratio": 0.01,
+      "val_fixed_threshold": 0.6139251589775085,
+      "val_recall": 0.263642,
+      "val_precision": 0.905192,
+      "test_fixed_threshold_recall": 0.27084,
+      "test_fixed_threshold_precision": 0.479334,
+      "test_fixed_threshold_fpr": 0.010608,
+      "test_fixed_threshold_review_count": 1742,
+      "test_fixed_threshold_fraud_captured": 835,
+      "test_fixed_budget_recall": 0.208887,
+      "test_fixed_budget_precision": 0.726862,
+      "test_fixed_budget_fpr": 0.00283,
+      "test_fixed_budget_review_count": 886,
+      "test_fixed_budget_fraud_captured": 644
+    },
+    {
+      "budget_name": "top_2.0pct",
+      "budget_ratio": 0.02,
+      "val_fixed_threshold": 0.2664627134799957,
+      "val_recall": 0.408613,
+      "val_precision": 0.701467,
+      "test_fixed_threshold_recall": 0.414531,
+      "test_fixed_threshold_precision": 0.36483,
+      "test_fixed_threshold_fpr": 0.026024,
+      "test_fixed_threshold_review_count": 3503,
+      "test_fixed_threshold_fraud_captured": 1278,
+      "test_fixed_budget_recall": 0.274732,
+      "test_fixed_budget_precision": 0.477991,
+      "test_fixed_budget_fpr": 0.010819,
+      "test_fixed_budget_review_count": 1772,
+      "test_fixed_budget_fraud_captured": 847
+    },
+    {
+      "budget_name": "top_5.0pct",
+      "budget_ratio": 0.05,
+      "val_fixed_threshold": 0.11536093056201935,
+      "val_recall": 0.564431,
+      "val_precision": 0.387672,
+      "test_fixed_threshold_recall": 0.580928,
+      "test_fixed_threshold_precision": 0.268516,
+      "test_fixed_threshold_fpr": 0.057066,
+      "test_fixed_threshold_review_count": 6670,
+      "test_fixed_threshold_fraud_captured": 1791,
+      "test_fixed_budget_recall": 0.478106,
+      "test_fixed_budget_precision": 0.332807,
+      "test_fixed_budget_fpr": 0.034562,
+      "test_fixed_budget_review_count": 4429,
+      "test_fixed_budget_fraud_captured": 1474
+    }
+  ],
+  "shap_summary": {
+    "top_10_global_features": [
+      {
+        "rank": 1,
+        "feature_name": "V244",
+        "feature_family": "Vesta Anonymised (Set A)",
+        "mean_abs_shap": 0.074767,
+        "is_anonymised": true,
+        "interpretation_note": "Anonymised structural pattern (behavioral driver, not causal)"
+      },
+      {
+        "rank": 2,
+        "feature_name": "P_emaildomain",
+        "feature_family": "Network / Address (Set B)",
+        "mean_abs_shap": 0.06094,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      },
+      {
+        "rank": 3,
+        "feature_name": "amount_cents",
+        "feature_family": "Other Features",
+        "mean_abs_shap": 0.039878,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      },
+      {
+        "rank": 4,
+        "feature_name": "C3",
+        "feature_family": "Transaction Counting (Set A)",
+        "mean_abs_shap": 0.034762,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      },
+      {
+        "rank": 5,
+        "feature_name": "C8",
+        "feature_family": "Transaction Counting (Set A)",
+        "mean_abs_shap": 0.030101,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      },
+      {
+        "rank": 6,
+        "feature_name": "V31",
+        "feature_family": "Vesta Anonymised (Set A)",
+        "mean_abs_shap": 0.029965,
+        "is_anonymised": true,
+        "interpretation_note": "Anonymised structural pattern (behavioral driver, not causal)"
+      },
+      {
+        "rank": 7,
+        "feature_name": "C9",
+        "feature_family": "Transaction Counting (Set A)",
+        "mean_abs_shap": 0.026582,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      },
+      {
+        "rank": 8,
+        "feature_name": "V166",
+        "feature_family": "Vesta Anonymised (Set A)",
+        "mean_abs_shap": 0.026237,
+        "is_anonymised": true,
+        "interpretation_note": "Anonymised structural pattern (behavioral driver, not causal)"
+      },
+      {
+        "rank": 9,
+        "feature_name": "V282",
+        "feature_family": "Vesta Anonymised (Set A)",
+        "mean_abs_shap": 0.024388,
+        "is_anonymised": true,
+        "interpretation_note": "Anonymised structural pattern (behavioral driver, not causal)"
+      },
+      {
+        "rank": 10,
+        "feature_name": "id_12",
+        "feature_family": "Identity (Set B)",
+        "mean_abs_shap": 0.023479,
+        "is_anonymised": false,
+        "interpretation_note": "Interpretable domain / entity attribute"
+      }
+    ],
+    "total_features_explained": 443,
+    "sample_size": 1842
+  }
+}

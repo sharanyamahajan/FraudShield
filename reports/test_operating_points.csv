@@ -1,0 +1,5 @@
+budget_name,budget_ratio,val_fixed_threshold,val_recall,val_precision,test_fixed_threshold_recall,test_fixed_threshold_precision,test_fixed_threshold_fpr,test_fixed_threshold_review_count,test_fixed_threshold_fraud_captured,test_fixed_budget_recall,test_fixed_budget_precision,test_fixed_budget_fpr,test_fixed_budget_review_count,test_fixed_budget_fraud_captured
+top_0.5pct,0.005,0.8684440851211548,0.13741,0.943567,0.157639,0.943689,0.000339,515,486,0.135907,0.945824,0.000281,443,419
+top_1.0pct,0.01,0.6139251589775085,0.263642,0.905192,0.27084,0.479334,0.010608,1742,835,0.208887,0.726862,0.00283,886,644
+top_2.0pct,0.02,0.2664627134799957,0.408613,0.701467,0.414531,0.36483,0.026024,3503,1278,0.274732,0.477991,0.010819,1772,847
+top_5.0pct,0.05,0.11536093056201935,0.564431,0.387672,0.580928,0.268516,0.057066,6670,1791,0.478106,0.332807,0.034562,4429,1474

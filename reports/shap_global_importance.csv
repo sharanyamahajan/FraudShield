@@ -1,0 +1,444 @@
+rank,feature_name,feature_family,mean_abs_shap,is_anonymised,interpretation_note
+1,V244,Vesta Anonymised (Set A),0.074767,True,"Anonymised structural pattern (behavioral driver, not causal)"
+2,P_emaildomain,Network / Address (Set B),0.06094,False,Interpretable domain / entity attribute
+3,amount_cents,Other Features,0.039878,False,Interpretable domain / entity attribute
+4,C3,Transaction Counting (Set A),0.034762,False,Interpretable domain / entity attribute
+5,C8,Transaction Counting (Set A),0.030101,False,Interpretable domain / entity attribute
+6,V31,Vesta Anonymised (Set A),0.029965,True,"Anonymised structural pattern (behavioral driver, not causal)"
+7,C9,Transaction Counting (Set A),0.026582,False,Interpretable domain / entity attribute
+8,V166,Vesta Anonymised (Set A),0.026237,True,"Anonymised structural pattern (behavioral driver, not causal)"
+9,V282,Vesta Anonymised (Set A),0.024388,True,"Anonymised structural pattern (behavioral driver, not causal)"
+10,id_12,Identity (Set B),0.023479,False,Interpretable domain / entity attribute
+11,V280,Vesta Anonymised (Set A),0.020868,True,"Anonymised structural pattern (behavioral driver, not causal)"
+12,V175,Vesta Anonymised (Set A),0.017823,True,"Anonymised structural pattern (behavioral driver, not causal)"
+13,card5,Transaction Core (Set A),0.017434,False,Interpretable domain / entity attribute
+14,V187,Vesta Anonymised (Set A),0.016822,True,"Anonymised structural pattern (behavioral driver, not causal)"
+15,V243,Vesta Anonymised (Set A),0.016407,True,"Anonymised structural pattern (behavioral driver, not causal)"
+16,C7,Transaction Counting (Set A),0.016147,False,Interpretable domain / entity attribute
+17,V142,Vesta Anonymised (Set A),0.016019,True,"Anonymised structural pattern (behavioral driver, not causal)"
+18,V173,Vesta Anonymised (Set A),0.012648,True,"Anonymised structural pattern (behavioral driver, not causal)"
+19,card3,Transaction Core (Set A),0.012419,False,Interpretable domain / entity attribute
+20,V138,Vesta Anonymised (Set A),0.01168,True,"Anonymised structural pattern (behavioral driver, not causal)"
+21,V293,Vesta Anonymised (Set A),0.011326,True,"Anonymised structural pattern (behavioral driver, not causal)"
+22,V312,Vesta Anonymised (Set A),0.011032,True,"Anonymised structural pattern (behavioral driver, not causal)"
+23,C1,Transaction Counting (Set A),0.010085,False,Interpretable domain / entity attribute
+24,V73,Vesta Anonymised (Set A),0.009331,True,"Anonymised structural pattern (behavioral driver, not causal)"
+25,V327,Vesta Anonymised (Set A),0.009163,True,"Anonymised structural pattern (behavioral driver, not causal)"
+26,C5,Transaction Counting (Set A),0.009124,False,Interpretable domain / entity attribute
+27,id_21,Identity (Set B),0.009078,False,Interpretable domain / entity attribute
+28,TransactionAmt,Transaction Core (Set A),0.008878,False,Interpretable domain / entity attribute
+29,R_emaildomain,Network / Address (Set B),0.008682,False,Interpretable domain / entity attribute
+30,D8,Timetable / Delta (Set A),0.008358,False,Interpretable domain / entity attribute
+31,id_10,Identity (Set B),0.007372,False,Interpretable domain / entity attribute
+32,V135,Vesta Anonymised (Set A),0.007067,True,"Anonymised structural pattern (behavioral driver, not causal)"
+33,hour_of_day_proxy,Other Features,0.006972,False,Interpretable domain / entity attribute
+34,card2,Transaction Core (Set A),0.006947,False,Interpretable domain / entity attribute
+35,C6,Transaction Counting (Set A),0.006771,False,Interpretable domain / entity attribute
+36,V339,Vesta Anonymised (Set A),0.006748,True,"Anonymised structural pattern (behavioral driver, not causal)"
+37,V230,Vesta Anonymised (Set A),0.006608,True,"Anonymised structural pattern (behavioral driver, not causal)"
+38,C11,Transaction Counting (Set A),0.006527,False,Interpretable domain / entity attribute
+39,V229,Vesta Anonymised (Set A),0.006262,True,"Anonymised structural pattern (behavioral driver, not causal)"
+40,V186,Vesta Anonymised (Set A),0.006211,True,"Anonymised structural pattern (behavioral driver, not causal)"
+41,V306,Vesta Anonymised (Set A),0.006171,True,"Anonymised structural pattern (behavioral driver, not causal)"
+42,V303,Vesta Anonymised (Set A),0.006161,True,"Anonymised structural pattern (behavioral driver, not causal)"
+43,C2,Transaction Counting (Set A),0.006001,False,Interpretable domain / entity attribute
+44,V315,Vesta Anonymised (Set A),0.005991,True,"Anonymised structural pattern (behavioral driver, not causal)"
+45,V113,Vesta Anonymised (Set A),0.005702,True,"Anonymised structural pattern (behavioral driver, not causal)"
+46,V302,Vesta Anonymised (Set A),0.005693,True,"Anonymised structural pattern (behavioral driver, not causal)"
+47,V281,Vesta Anonymised (Set A),0.005645,True,"Anonymised structural pattern (behavioral driver, not causal)"
+48,V266,Vesta Anonymised (Set A),0.005618,True,"Anonymised structural pattern (behavioral driver, not causal)"
+49,id_23,Identity (Set B),0.00561,False,Interpretable domain / entity attribute
+50,V117,Vesta Anonymised (Set A),0.005371,True,"Anonymised structural pattern (behavioral driver, not causal)"
+51,V285,Vesta Anonymised (Set A),0.00537,True,"Anonymised structural pattern (behavioral driver, not causal)"
+52,V245,Vesta Anonymised (Set A),0.005351,True,"Anonymised structural pattern (behavioral driver, not causal)"
+53,V119,Vesta Anonymised (Set A),0.004923,True,"Anonymised structural pattern (behavioral driver, not causal)"
+54,V88,Vesta Anonymised (Set A),0.004562,True,"Anonymised structural pattern (behavioral driver, not causal)"
+55,C13,Transaction Counting (Set A),0.004511,False,Interpretable domain / entity attribute
+56,id_15,Identity (Set B),0.004479,False,Interpretable domain / entity attribute
+57,card1,Transaction Core (Set A),0.004371,False,Interpretable domain / entity attribute
+58,D3,Timetable / Delta (Set A),0.004349,False,Interpretable domain / entity attribute
+59,D1,Timetable / Delta (Set A),0.00434,False,Interpretable domain / entity attribute
+60,id_19,Identity (Set B),0.004291,False,Interpretable domain / entity attribute
+61,id_29,Identity (Set B),0.004214,False,Interpretable domain / entity attribute
+62,V271,Vesta Anonymised (Set A),0.004207,True,"Anonymised structural pattern (behavioral driver, not causal)"
+63,V265,Vesta Anonymised (Set A),0.004164,True,"Anonymised structural pattern (behavioral driver, not causal)"
+64,V203,Vesta Anonymised (Set A),0.004158,True,"Anonymised structural pattern (behavioral driver, not causal)"
+65,V46,Vesta Anonymised (Set A),0.004128,True,"Anonymised structural pattern (behavioral driver, not causal)"
+66,id_14,Identity (Set B),0.004128,False,Interpretable domain / entity attribute
+67,V153,Vesta Anonymised (Set A),0.004058,True,"Anonymised structural pattern (behavioral driver, not causal)"
+68,V205,Vesta Anonymised (Set A),0.003996,True,"Anonymised structural pattern (behavioral driver, not causal)"
+69,V168,Vesta Anonymised (Set A),0.003989,True,"Anonymised structural pattern (behavioral driver, not causal)"
+70,card4,Transaction Core (Set A),0.003987,False,Interpretable domain / entity attribute
+71,id_28,Identity (Set B),0.003974,False,Interpretable domain / entity attribute
+72,C12,Transaction Counting (Set A),0.00391,False,Interpretable domain / entity attribute
+73,V304,Vesta Anonymised (Set A),0.003805,True,"Anonymised structural pattern (behavioral driver, not causal)"
+74,V48,Vesta Anonymised (Set A),0.003731,True,"Anonymised structural pattern (behavioral driver, not causal)"
+75,id_22,Identity (Set B),0.003678,False,Interpretable domain / entity attribute
+76,V252,Vesta Anonymised (Set A),0.00364,True,"Anonymised structural pattern (behavioral driver, not causal)"
+77,card1_prior_count,Entity History (Set C1),0.003564,False,Interpretable domain / entity attribute
+78,V279,Vesta Anonymised (Set A),0.003539,True,"Anonymised structural pattern (behavioral driver, not causal)"
+79,id_27,Identity (Set B),0.003489,False,Interpretable domain / entity attribute
+80,V298,Vesta Anonymised (Set A),0.003316,True,"Anonymised structural pattern (behavioral driver, not causal)"
+81,V314,Vesta Anonymised (Set A),0.003302,True,"Anonymised structural pattern (behavioral driver, not causal)"
+82,card1_distinct_p_emaildomain_cnt,Entity History (Set C1),0.003242,False,Interpretable domain / entity attribute
+83,addr1,Network / Address (Set B),0.003236,False,Interpretable domain / entity attribute
+84,V196,Vesta Anonymised (Set A),0.00323,True,"Anonymised structural pattern (behavioral driver, not causal)"
+85,D10,Timetable / Delta (Set A),0.003215,False,Interpretable domain / entity attribute
+86,V328,Vesta Anonymised (Set A),0.003188,True,"Anonymised structural pattern (behavioral driver, not causal)"
+87,V330,Vesta Anonymised (Set A),0.003173,True,"Anonymised structural pattern (behavioral driver, not causal)"
+88,V247,Vesta Anonymised (Set A),0.003162,True,"Anonymised structural pattern (behavioral driver, not causal)"
+89,V85,Vesta Anonymised (Set A),0.003146,True,"Anonymised structural pattern (behavioral driver, not causal)"
+90,ProductCD,Transaction Core (Set A),0.003114,False,Interpretable domain / entity attribute
+91,V65,Vesta Anonymised (Set A),0.003081,True,"Anonymised structural pattern (behavioral driver, not causal)"
+92,V300,Vesta Anonymised (Set A),0.003063,True,"Anonymised structural pattern (behavioral driver, not causal)"
+93,C10,Transaction Counting (Set A),0.003007,False,Interpretable domain / entity attribute
+94,id_13,Identity (Set B),0.003004,False,Interpretable domain / entity attribute
+95,V53,Vesta Anonymised (Set A),0.002953,True,"Anonymised structural pattern (behavioral driver, not causal)"
+96,V296,Vesta Anonymised (Set A),0.002943,True,"Anonymised structural pattern (behavioral driver, not causal)"
+97,card6,Transaction Core (Set A),0.002848,False,Interpretable domain / entity attribute
+98,id_03,Identity (Set B),0.00284,False,Interpretable domain / entity attribute
+99,V189,Vesta Anonymised (Set A),0.002796,True,"Anonymised structural pattern (behavioral driver, not causal)"
+100,V82,Vesta Anonymised (Set A),0.002782,True,"Anonymised structural pattern (behavioral driver, not causal)"
+101,dist1,Other Features,0.002752,False,Interpretable domain / entity attribute
+102,V326,Vesta Anonymised (Set A),0.002614,True,"Anonymised structural pattern (behavioral driver, not causal)"
+103,V161,Vesta Anonymised (Set A),0.002589,True,"Anonymised structural pattern (behavioral driver, not causal)"
+104,id_17,Identity (Set B),0.002456,False,Interpretable domain / entity attribute
+105,V24,Vesta Anonymised (Set A),0.00244,True,"Anonymised structural pattern (behavioral driver, not causal)"
+106,V172,Vesta Anonymised (Set A),0.002338,True,"Anonymised structural pattern (behavioral driver, not causal)"
+107,V294,Vesta Anonymised (Set A),0.002328,True,"Anonymised structural pattern (behavioral driver, not causal)"
+108,DeviceInfo,Timetable / Delta (Set A),0.002116,False,Interpretable domain / entity attribute
+109,V269,Vesta Anonymised (Set A),0.002109,True,"Anonymised structural pattern (behavioral driver, not causal)"
+110,V316,Vesta Anonymised (Set A),0.002044,True,"Anonymised structural pattern (behavioral driver, not causal)"
+111,V146,Vesta Anonymised (Set A),0.00203,True,"Anonymised structural pattern (behavioral driver, not causal)"
+112,V209,Vesta Anonymised (Set A),0.002029,True,"Anonymised structural pattern (behavioral driver, not causal)"
+113,id_11,Identity (Set B),0.00201,False,Interpretable domain / entity attribute
+114,V284,Vesta Anonymised (Set A),0.001977,True,"Anonymised structural pattern (behavioral driver, not causal)"
+115,V318,Vesta Anonymised (Set A),0.001972,True,"Anonymised structural pattern (behavioral driver, not causal)"
+116,card1_distinct_addr1_cnt,Entity History (Set C1),0.001891,False,Interpretable domain / entity attribute
+117,V248,Vesta Anonymised (Set A),0.001878,True,"Anonymised structural pattern (behavioral driver, not causal)"
+118,V155,Vesta Anonymised (Set A),0.001867,True,"Anonymised structural pattern (behavioral driver, not causal)"
+119,V237,Vesta Anonymised (Set A),0.001865,True,"Anonymised structural pattern (behavioral driver, not causal)"
+120,V64,Vesta Anonymised (Set A),0.00185,True,"Anonymised structural pattern (behavioral driver, not causal)"
+121,V19,Vesta Anonymised (Set A),0.001805,True,"Anonymised structural pattern (behavioral driver, not causal)"
+122,V308,Vesta Anonymised (Set A),0.001752,True,"Anonymised structural pattern (behavioral driver, not causal)"
+123,V37,Vesta Anonymised (Set A),0.00172,True,"Anonymised structural pattern (behavioral driver, not causal)"
+124,V50,Vesta Anonymised (Set A),0.001716,True,"Anonymised structural pattern (behavioral driver, not causal)"
+125,D7,Timetable / Delta (Set A),0.001697,False,Interpretable domain / entity attribute
+126,V151,Vesta Anonymised (Set A),0.001672,True,"Anonymised structural pattern (behavioral driver, not causal)"
+127,id_26,Identity (Set B),0.001622,False,Interpretable domain / entity attribute
+128,id_16,Identity (Set B),0.001611,False,Interpretable domain / entity attribute
+129,id_18,Identity (Set B),0.00159,False,Interpretable domain / entity attribute
+130,V90,Vesta Anonymised (Set A),0.001579,True,"Anonymised structural pattern (behavioral driver, not causal)"
+131,V337,Vesta Anonymised (Set A),0.00156,True,"Anonymised structural pattern (behavioral driver, not causal)"
+132,V20,Vesta Anonymised (Set A),0.001528,True,"Anonymised structural pattern (behavioral driver, not causal)"
+133,V150,Vesta Anonymised (Set A),0.001526,True,"Anonymised structural pattern (behavioral driver, not causal)"
+134,V194,Vesta Anonymised (Set A),0.001511,True,"Anonymised structural pattern (behavioral driver, not causal)"
+135,V231,Vesta Anonymised (Set A),0.001475,True,"Anonymised structural pattern (behavioral driver, not causal)"
+136,V157,Vesta Anonymised (Set A),0.00146,True,"Anonymised structural pattern (behavioral driver, not causal)"
+137,V193,Vesta Anonymised (Set A),0.00146,True,"Anonymised structural pattern (behavioral driver, not causal)"
+138,V310,Vesta Anonymised (Set A),0.001441,True,"Anonymised structural pattern (behavioral driver, not causal)"
+139,V156,Vesta Anonymised (Set A),0.00144,True,"Anonymised structural pattern (behavioral driver, not causal)"
+140,V133,Vesta Anonymised (Set A),0.00143,True,"Anonymised structural pattern (behavioral driver, not causal)"
+141,V38,Vesta Anonymised (Set A),0.001421,True,"Anonymised structural pattern (behavioral driver, not causal)"
+142,dist2,Other Features,0.001396,False,Interpretable domain / entity attribute
+143,V331,Vesta Anonymised (Set A),0.001379,True,"Anonymised structural pattern (behavioral driver, not causal)"
+144,V144,Vesta Anonymised (Set A),0.001371,True,"Anonymised structural pattern (behavioral driver, not causal)"
+145,V215,Vesta Anonymised (Set A),0.001369,True,"Anonymised structural pattern (behavioral driver, not causal)"
+146,V334,Vesta Anonymised (Set A),0.001369,True,"Anonymised structural pattern (behavioral driver, not causal)"
+147,V30,Vesta Anonymised (Set A),0.001312,True,"Anonymised structural pattern (behavioral driver, not causal)"
+148,V68,Vesta Anonymised (Set A),0.001308,True,"Anonymised structural pattern (behavioral driver, not causal)"
+149,V210,Vesta Anonymised (Set A),0.001266,True,"Anonymised structural pattern (behavioral driver, not causal)"
+150,V301,Vesta Anonymised (Set A),0.001255,True,"Anonymised structural pattern (behavioral driver, not causal)"
+151,V254,Vesta Anonymised (Set A),0.001254,True,"Anonymised structural pattern (behavioral driver, not causal)"
+152,V260,Vesta Anonymised (Set A),0.001252,True,"Anonymised structural pattern (behavioral driver, not causal)"
+153,V259,Vesta Anonymised (Set A),0.001245,True,"Anonymised structural pattern (behavioral driver, not causal)"
+154,M7,Match Flags (Set A),0.001234,False,Interpretable domain / entity attribute
+155,V309,Vesta Anonymised (Set A),0.001213,True,"Anonymised structural pattern (behavioral driver, not causal)"
+156,V228,Vesta Anonymised (Set A),0.001211,True,"Anonymised structural pattern (behavioral driver, not causal)"
+157,V125,Vesta Anonymised (Set A),0.001209,True,"Anonymised structural pattern (behavioral driver, not causal)"
+158,V80,Vesta Anonymised (Set A),0.001153,True,"Anonymised structural pattern (behavioral driver, not causal)"
+159,V23,Vesta Anonymised (Set A),0.001105,True,"Anonymised structural pattern (behavioral driver, not causal)"
+160,id_01,Identity (Set B),0.001096,False,Interpretable domain / entity attribute
+161,V299,Vesta Anonymised (Set A),0.001084,True,"Anonymised structural pattern (behavioral driver, not causal)"
+162,V188,Vesta Anonymised (Set A),0.001083,True,"Anonymised structural pattern (behavioral driver, not causal)"
+163,V267,Vesta Anonymised (Set A),0.001083,True,"Anonymised structural pattern (behavioral driver, not causal)"
+164,card1_cnt_1h,Entity History (Set C1),0.001083,False,Interpretable domain / entity attribute
+165,V251,Vesta Anonymised (Set A),0.00108,True,"Anonymised structural pattern (behavioral driver, not causal)"
+166,D9,Timetable / Delta (Set A),0.001051,False,Interpretable domain / entity attribute
+167,V49,Vesta Anonymised (Set A),0.001033,True,"Anonymised structural pattern (behavioral driver, not causal)"
+168,V263,Vesta Anonymised (Set A),0.001009,True,"Anonymised structural pattern (behavioral driver, not causal)"
+169,V322,Vesta Anonymised (Set A),0.001005,True,"Anonymised structural pattern (behavioral driver, not causal)"
+170,V129,Vesta Anonymised (Set A),0.000988,True,"Anonymised structural pattern (behavioral driver, not causal)"
+171,V122,Vesta Anonymised (Set A),0.000958,True,"Anonymised structural pattern (behavioral driver, not causal)"
+172,V71,Vesta Anonymised (Set A),0.000955,True,"Anonymised structural pattern (behavioral driver, not causal)"
+173,V204,Vesta Anonymised (Set A),0.000923,True,"Anonymised structural pattern (behavioral driver, not causal)"
+174,V179,Vesta Anonymised (Set A),0.000896,True,"Anonymised structural pattern (behavioral driver, not causal)"
+175,V180,Vesta Anonymised (Set A),0.000884,True,"Anonymised structural pattern (behavioral driver, not causal)"
+176,V184,Vesta Anonymised (Set A),0.000883,True,"Anonymised structural pattern (behavioral driver, not causal)"
+177,C14,Transaction Counting (Set A),0.000841,False,Interpretable domain / entity attribute
+178,V9,Vesta Anonymised (Set A),0.000839,True,"Anonymised structural pattern (behavioral driver, not causal)"
+179,V44,Vesta Anonymised (Set A),0.000839,True,"Anonymised structural pattern (behavioral driver, not causal)"
+180,V195,Vesta Anonymised (Set A),0.000831,True,"Anonymised structural pattern (behavioral driver, not causal)"
+181,V208,Vesta Anonymised (Set A),0.000829,True,"Anonymised structural pattern (behavioral driver, not causal)"
+182,V191,Vesta Anonymised (Set A),0.000816,True,"Anonymised structural pattern (behavioral driver, not causal)"
+183,V69,Vesta Anonymised (Set A),0.000811,True,"Anonymised structural pattern (behavioral driver, not causal)"
+184,V126,Vesta Anonymised (Set A),0.000807,True,"Anonymised structural pattern (behavioral driver, not causal)"
+185,D5,Timetable / Delta (Set A),0.000806,False,Interpretable domain / entity attribute
+186,V39,Vesta Anonymised (Set A),0.000806,True,"Anonymised structural pattern (behavioral driver, not causal)"
+187,id_09,Identity (Set B),0.000786,False,Interpretable domain / entity attribute
+188,C4,Transaction Counting (Set A),0.000761,False,Interpretable domain / entity attribute
+189,M8,Match Flags (Set A),0.000761,False,Interpretable domain / entity attribute
+190,V67,Vesta Anonymised (Set A),0.000758,True,"Anonymised structural pattern (behavioral driver, not causal)"
+191,V28,Vesta Anonymised (Set A),0.000754,True,"Anonymised structural pattern (behavioral driver, not causal)"
+192,V164,Vesta Anonymised (Set A),0.000748,True,"Anonymised structural pattern (behavioral driver, not causal)"
+193,V63,Vesta Anonymised (Set A),0.000742,True,"Anonymised structural pattern (behavioral driver, not causal)"
+194,V261,Vesta Anonymised (Set A),0.00071,True,"Anonymised structural pattern (behavioral driver, not causal)"
+195,V297,Vesta Anonymised (Set A),0.000706,True,"Anonymised structural pattern (behavioral driver, not causal)"
+196,V219,Vesta Anonymised (Set A),0.000705,True,"Anonymised structural pattern (behavioral driver, not causal)"
+197,V120,Vesta Anonymised (Set A),0.00069,True,"Anonymised structural pattern (behavioral driver, not causal)"
+198,V47,Vesta Anonymised (Set A),0.000685,True,"Anonymised structural pattern (behavioral driver, not causal)"
+199,V307,Vesta Anonymised (Set A),0.000674,True,"Anonymised structural pattern (behavioral driver, not causal)"
+200,id_02,Identity (Set B),0.000668,False,Interpretable domain / entity attribute
+201,D4,Timetable / Delta (Set A),0.000656,False,Interpretable domain / entity attribute
+202,V181,Vesta Anonymised (Set A),0.000651,True,"Anonymised structural pattern (behavioral driver, not causal)"
+203,V329,Vesta Anonymised (Set A),0.000633,True,"Anonymised structural pattern (behavioral driver, not causal)"
+204,V242,Vesta Anonymised (Set A),0.00063,True,"Anonymised structural pattern (behavioral driver, not causal)"
+205,V41,Vesta Anonymised (Set A),0.000629,True,"Anonymised structural pattern (behavioral driver, not causal)"
+206,V250,Vesta Anonymised (Set A),0.000629,True,"Anonymised structural pattern (behavioral driver, not causal)"
+207,V140,Vesta Anonymised (Set A),0.000627,True,"Anonymised structural pattern (behavioral driver, not causal)"
+208,V26,Vesta Anonymised (Set A),0.000622,True,"Anonymised structural pattern (behavioral driver, not causal)"
+209,V190,Vesta Anonymised (Set A),0.000622,True,"Anonymised structural pattern (behavioral driver, not causal)"
+210,V89,Vesta Anonymised (Set A),0.000621,True,"Anonymised structural pattern (behavioral driver, not causal)"
+211,V253,Vesta Anonymised (Set A),0.000621,True,"Anonymised structural pattern (behavioral driver, not causal)"
+212,V81,Vesta Anonymised (Set A),0.000617,True,"Anonymised structural pattern (behavioral driver, not causal)"
+213,V60,Vesta Anonymised (Set A),0.0006,True,"Anonymised structural pattern (behavioral driver, not causal)"
+214,V197,Vesta Anonymised (Set A),0.000595,True,"Anonymised structural pattern (behavioral driver, not causal)"
+215,V338,Vesta Anonymised (Set A),0.000566,True,"Anonymised structural pattern (behavioral driver, not causal)"
+216,V185,Vesta Anonymised (Set A),0.000564,True,"Anonymised structural pattern (behavioral driver, not causal)"
+217,V66,Vesta Anonymised (Set A),0.000559,True,"Anonymised structural pattern (behavioral driver, not causal)"
+218,V174,Vesta Anonymised (Set A),0.000548,True,"Anonymised structural pattern (behavioral driver, not causal)"
+219,V10,Vesta Anonymised (Set A),0.000531,True,"Anonymised structural pattern (behavioral driver, not causal)"
+220,V55,Vesta Anonymised (Set A),0.00052,True,"Anonymised structural pattern (behavioral driver, not causal)"
+221,V42,Vesta Anonymised (Set A),0.000516,True,"Anonymised structural pattern (behavioral driver, not causal)"
+222,addr2,Network / Address (Set B),0.000514,False,Interpretable domain / entity attribute
+223,V58,Vesta Anonymised (Set A),0.000514,True,"Anonymised structural pattern (behavioral driver, not causal)"
+224,V225,Vesta Anonymised (Set A),0.000504,True,"Anonymised structural pattern (behavioral driver, not causal)"
+225,V124,Vesta Anonymised (Set A),0.000504,True,"Anonymised structural pattern (behavioral driver, not causal)"
+226,V277,Vesta Anonymised (Set A),0.000488,True,"Anonymised structural pattern (behavioral driver, not causal)"
+227,V163,Vesta Anonymised (Set A),0.000488,True,"Anonymised structural pattern (behavioral driver, not causal)"
+228,V116,Vesta Anonymised (Set A),0.000479,True,"Anonymised structural pattern (behavioral driver, not causal)"
+229,V162,Vesta Anonymised (Set A),0.00046,True,"Anonymised structural pattern (behavioral driver, not causal)"
+230,V110,Vesta Anonymised (Set A),0.000457,True,"Anonymised structural pattern (behavioral driver, not causal)"
+231,V109,Vesta Anonymised (Set A),0.000455,True,"Anonymised structural pattern (behavioral driver, not causal)"
+232,V52,Vesta Anonymised (Set A),0.000451,True,"Anonymised structural pattern (behavioral driver, not causal)"
+233,V72,Vesta Anonymised (Set A),0.000441,True,"Anonymised structural pattern (behavioral driver, not causal)"
+234,V16,Vesta Anonymised (Set A),0.000412,True,"Anonymised structural pattern (behavioral driver, not causal)"
+235,V43,Vesta Anonymised (Set A),0.00041,True,"Anonymised structural pattern (behavioral driver, not causal)"
+236,V25,Vesta Anonymised (Set A),0.000406,True,"Anonymised structural pattern (behavioral driver, not causal)"
+237,V264,Vesta Anonymised (Set A),0.0004,True,"Anonymised structural pattern (behavioral driver, not causal)"
+238,V152,Vesta Anonymised (Set A),0.000387,True,"Anonymised structural pattern (behavioral driver, not causal)"
+239,V33,Vesta Anonymised (Set A),0.00038,True,"Anonymised structural pattern (behavioral driver, not causal)"
+240,V317,Vesta Anonymised (Set A),0.000365,True,"Anonymised structural pattern (behavioral driver, not causal)"
+241,V207,Vesta Anonymised (Set A),0.000362,True,"Anonymised structural pattern (behavioral driver, not causal)"
+242,V40,Vesta Anonymised (Set A),0.000356,True,"Anonymised structural pattern (behavioral driver, not causal)"
+243,V249,Vesta Anonymised (Set A),0.000347,True,"Anonymised structural pattern (behavioral driver, not causal)"
+244,V29,Vesta Anonymised (Set A),0.000344,True,"Anonymised structural pattern (behavioral driver, not causal)"
+245,V56,Vesta Anonymised (Set A),0.000342,True,"Anonymised structural pattern (behavioral driver, not causal)"
+246,V131,Vesta Anonymised (Set A),0.000338,True,"Anonymised structural pattern (behavioral driver, not causal)"
+247,V213,Vesta Anonymised (Set A),0.000336,True,"Anonymised structural pattern (behavioral driver, not causal)"
+248,D2,Timetable / Delta (Set A),0.000335,False,Interpretable domain / entity attribute
+249,V246,Vesta Anonymised (Set A),0.00033,True,"Anonymised structural pattern (behavioral driver, not causal)"
+250,V239,Vesta Anonymised (Set A),0.000328,True,"Anonymised structural pattern (behavioral driver, not causal)"
+251,V171,Vesta Anonymised (Set A),0.000327,True,"Anonymised structural pattern (behavioral driver, not causal)"
+252,V136,Vesta Anonymised (Set A),0.000326,True,"Anonymised structural pattern (behavioral driver, not causal)"
+253,V35,Vesta Anonymised (Set A),0.000325,True,"Anonymised structural pattern (behavioral driver, not causal)"
+254,D6,Timetable / Delta (Set A),0.000324,False,Interpretable domain / entity attribute
+255,V61,Vesta Anonymised (Set A),0.000324,True,"Anonymised structural pattern (behavioral driver, not causal)"
+256,V141,Vesta Anonymised (Set A),0.000306,True,"Anonymised structural pattern (behavioral driver, not causal)"
+257,V198,Vesta Anonymised (Set A),0.000305,True,"Anonymised structural pattern (behavioral driver, not causal)"
+258,card1_amt_to_prior_mean_ratio,Entity History (Set C1),0.000291,False,Interpretable domain / entity attribute
+259,V217,Vesta Anonymised (Set A),0.000289,True,"Anonymised structural pattern (behavioral driver, not causal)"
+260,V295,Vesta Anonymised (Set A),0.000287,True,"Anonymised structural pattern (behavioral driver, not causal)"
+261,V257,Vesta Anonymised (Set A),0.000286,True,"Anonymised structural pattern (behavioral driver, not causal)"
+262,V319,Vesta Anonymised (Set A),0.000284,True,"Anonymised structural pattern (behavioral driver, not causal)"
+263,V218,Vesta Anonymised (Set A),0.000278,True,"Anonymised structural pattern (behavioral driver, not causal)"
+264,V22,Vesta Anonymised (Set A),0.000273,True,"Anonymised structural pattern (behavioral driver, not causal)"
+265,V234,Vesta Anonymised (Set A),0.000271,True,"Anonymised structural pattern (behavioral driver, not causal)"
+266,V224,Vesta Anonymised (Set A),0.000268,True,"Anonymised structural pattern (behavioral driver, not causal)"
+267,V199,Vesta Anonymised (Set A),0.000251,True,"Anonymised structural pattern (behavioral driver, not causal)"
+268,V5,Vesta Anonymised (Set A),0.000249,True,"Anonymised structural pattern (behavioral driver, not causal)"
+269,id_35,Identity (Set B),0.000248,False,Interpretable domain / entity attribute
+270,V59,Vesta Anonymised (Set A),0.00024,True,"Anonymised structural pattern (behavioral driver, not causal)"
+271,V95,Vesta Anonymised (Set A),0.000239,True,"Anonymised structural pattern (behavioral driver, not causal)"
+272,V262,Vesta Anonymised (Set A),0.000234,True,"Anonymised structural pattern (behavioral driver, not causal)"
+273,V292,Vesta Anonymised (Set A),0.000231,True,"Anonymised structural pattern (behavioral driver, not causal)"
+274,V169,Vesta Anonymised (Set A),0.00023,True,"Anonymised structural pattern (behavioral driver, not causal)"
+275,V45,Vesta Anonymised (Set A),0.000222,True,"Anonymised structural pattern (behavioral driver, not causal)"
+276,V34,Vesta Anonymised (Set A),0.000209,True,"Anonymised structural pattern (behavioral driver, not causal)"
+277,V83,Vesta Anonymised (Set A),0.000208,True,"Anonymised structural pattern (behavioral driver, not causal)"
+278,V201,Vesta Anonymised (Set A),0.000206,True,"Anonymised structural pattern (behavioral driver, not causal)"
+279,V79,Vesta Anonymised (Set A),0.000204,True,"Anonymised structural pattern (behavioral driver, not causal)"
+280,V273,Vesta Anonymised (Set A),0.000204,True,"Anonymised structural pattern (behavioral driver, not causal)"
+281,V62,Vesta Anonymised (Set A),0.000197,True,"Anonymised structural pattern (behavioral driver, not causal)"
+282,V100,Vesta Anonymised (Set A),0.000195,True,"Anonymised structural pattern (behavioral driver, not causal)"
+283,V98,Vesta Anonymised (Set A),0.000188,True,"Anonymised structural pattern (behavioral driver, not causal)"
+284,V211,Vesta Anonymised (Set A),0.000186,True,"Anonymised structural pattern (behavioral driver, not causal)"
+285,V94,Vesta Anonymised (Set A),0.000184,True,"Anonymised structural pattern (behavioral driver, not causal)"
+286,V158,Vesta Anonymised (Set A),0.000183,True,"Anonymised structural pattern (behavioral driver, not causal)"
+287,D12,Timetable / Delta (Set A),0.000181,False,Interpretable domain / entity attribute
+288,V127,Vesta Anonymised (Set A),0.000181,True,"Anonymised structural pattern (behavioral driver, not causal)"
+289,V78,Vesta Anonymised (Set A),0.000181,True,"Anonymised structural pattern (behavioral driver, not causal)"
+290,V268,Vesta Anonymised (Set A),0.000179,True,"Anonymised structural pattern (behavioral driver, not causal)"
+291,V289,Vesta Anonymised (Set A),0.000178,True,"Anonymised structural pattern (behavioral driver, not causal)"
+292,V170,Vesta Anonymised (Set A),0.000173,True,"Anonymised structural pattern (behavioral driver, not causal)"
+293,V91,Vesta Anonymised (Set A),0.000168,True,"Anonymised structural pattern (behavioral driver, not causal)"
+294,V182,Vesta Anonymised (Set A),0.000167,True,"Anonymised structural pattern (behavioral driver, not causal)"
+295,V232,Vesta Anonymised (Set A),0.000166,True,"Anonymised structural pattern (behavioral driver, not causal)"
+296,V114,Vesta Anonymised (Set A),0.000163,True,"Anonymised structural pattern (behavioral driver, not causal)"
+297,V276,Vesta Anonymised (Set A),0.000158,True,"Anonymised structural pattern (behavioral driver, not causal)"
+298,V220,Vesta Anonymised (Set A),0.000157,True,"Anonymised structural pattern (behavioral driver, not causal)"
+299,V137,Vesta Anonymised (Set A),0.000154,True,"Anonymised structural pattern (behavioral driver, not causal)"
+300,V221,Vesta Anonymised (Set A),0.000153,True,"Anonymised structural pattern (behavioral driver, not causal)"
+301,V290,Vesta Anonymised (Set A),0.00015,True,"Anonymised structural pattern (behavioral driver, not causal)"
+302,V272,Vesta Anonymised (Set A),0.000147,True,"Anonymised structural pattern (behavioral driver, not causal)"
+303,V121,Vesta Anonymised (Set A),0.000145,True,"Anonymised structural pattern (behavioral driver, not causal)"
+304,V70,Vesta Anonymised (Set A),0.000142,True,"Anonymised structural pattern (behavioral driver, not causal)"
+305,V118,Vesta Anonymised (Set A),0.000136,True,"Anonymised structural pattern (behavioral driver, not causal)"
+306,V6,Vesta Anonymised (Set A),0.000135,True,"Anonymised structural pattern (behavioral driver, not causal)"
+307,V236,Vesta Anonymised (Set A),0.000135,True,"Anonymised structural pattern (behavioral driver, not causal)"
+308,V255,Vesta Anonymised (Set A),0.000133,True,"Anonymised structural pattern (behavioral driver, not causal)"
+309,V176,Vesta Anonymised (Set A),0.000132,True,"Anonymised structural pattern (behavioral driver, not causal)"
+310,V2,Vesta Anonymised (Set A),0.000127,True,"Anonymised structural pattern (behavioral driver, not causal)"
+311,V206,Vesta Anonymised (Set A),0.000121,True,"Anonymised structural pattern (behavioral driver, not causal)"
+312,V97,Vesta Anonymised (Set A),0.000121,True,"Anonymised structural pattern (behavioral driver, not causal)"
+313,id_20,Identity (Set B),0.000113,False,Interpretable domain / entity attribute
+314,V3,Vesta Anonymised (Set A),0.000108,True,"Anonymised structural pattern (behavioral driver, not causal)"
+315,V15,Vesta Anonymised (Set A),0.000106,True,"Anonymised structural pattern (behavioral driver, not causal)"
+316,V258,Vesta Anonymised (Set A),0.000106,True,"Anonymised structural pattern (behavioral driver, not causal)"
+317,V222,Vesta Anonymised (Set A),0.000106,True,"Anonymised structural pattern (behavioral driver, not causal)"
+318,V149,Vesta Anonymised (Set A),0.000105,True,"Anonymised structural pattern (behavioral driver, not causal)"
+319,D15,Timetable / Delta (Set A),0.000103,False,Interpretable domain / entity attribute
+320,V214,Vesta Anonymised (Set A),0.000102,True,"Anonymised structural pattern (behavioral driver, not causal)"
+321,V111,Vesta Anonymised (Set A),0.000101,True,"Anonymised structural pattern (behavioral driver, not causal)"
+322,V8,Vesta Anonymised (Set A),9.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+323,V275,Vesta Anonymised (Set A),9.6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+324,V256,Vesta Anonymised (Set A),9.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+325,V226,Vesta Anonymised (Set A),9.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+326,V101,Vesta Anonymised (Set A),9.1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+327,card1_cnt_24h,Entity History (Set C1),9e-05,False,Interpretable domain / entity attribute
+328,V32,Vesta Anonymised (Set A),9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+329,V21,Vesta Anonymised (Set A),8.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+330,V154,Vesta Anonymised (Set A),8.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+331,V143,Vesta Anonymised (Set A),8.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+332,V233,Vesta Anonymised (Set A),8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+333,V12,Vesta Anonymised (Set A),7.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+334,V134,Vesta Anonymised (Set A),7.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+335,V212,Vesta Anonymised (Set A),7.6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+336,id_04,Identity (Set B),7.4e-05,False,Interpretable domain / entity attribute
+337,V177,Vesta Anonymised (Set A),7.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+338,V115,Vesta Anonymised (Set A),6.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+339,id_36,Identity (Set B),6.6e-05,False,Interpretable domain / entity attribute
+340,V202,Vesta Anonymised (Set A),6.6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+341,V200,Vesta Anonymised (Set A),6.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+342,V148,Vesta Anonymised (Set A),6.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+343,V324,Vesta Anonymised (Set A),6.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+344,D13,Timetable / Delta (Set A),6.2e-05,False,Interpretable domain / entity attribute
+345,V332,Vesta Anonymised (Set A),6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+346,V128,Vesta Anonymised (Set A),6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+347,V130,Vesta Anonymised (Set A),6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+348,card1_seconds_since_prev,Entity History (Set C1),5.7e-05,False,Interpretable domain / entity attribute
+349,id_30,Identity (Set B),5.6e-05,False,Interpretable domain / entity attribute
+350,V17,Vesta Anonymised (Set A),5.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+351,V165,Vesta Anonymised (Set A),5.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+352,V336,Vesta Anonymised (Set A),5.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+353,V241,Vesta Anonymised (Set A),5.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+354,V112,Vesta Anonymised (Set A),5.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+355,V167,Vesta Anonymised (Set A),4.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+356,V18,Vesta Anonymised (Set A),4.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+357,V287,Vesta Anonymised (Set A),4.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+358,V147,Vesta Anonymised (Set A),4.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+359,V223,Vesta Anonymised (Set A),4.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+360,V240,Vesta Anonymised (Set A),4.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+361,V333,Vesta Anonymised (Set A),4.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+362,V86,Vesta Anonymised (Set A),4.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+363,V11,Vesta Anonymised (Set A),4.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+364,V103,Vesta Anonymised (Set A),4.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+365,V238,Vesta Anonymised (Set A),4.1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+366,id_07,Identity (Set B),3.9e-05,False,Interpretable domain / entity attribute
+367,V104,Vesta Anonymised (Set A),3.8e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+368,id_25,Identity (Set B),3.4e-05,False,Interpretable domain / entity attribute
+369,V286,Vesta Anonymised (Set A),3.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+370,V145,Vesta Anonymised (Set A),3.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+371,V1,Vesta Anonymised (Set A),3.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+372,V278,Vesta Anonymised (Set A),3.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+373,V178,Vesta Anonymised (Set A),3.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+374,V92,Vesta Anonymised (Set A),3.1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+375,V159,Vesta Anonymised (Set A),3.1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+376,V216,Vesta Anonymised (Set A),2.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+377,V270,Vesta Anonymised (Set A),2.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+378,V321,Vesta Anonymised (Set A),2.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+379,V4,Vesta Anonymised (Set A),2.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+380,V74,Vesta Anonymised (Set A),2.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+381,card1_prior_amt_mean,Entity History (Set C1),2.5e-05,False,Interpretable domain / entity attribute
+382,V87,Vesta Anonymised (Set A),2.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+383,V107,Vesta Anonymised (Set A),2.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+384,V323,Vesta Anonymised (Set A),2.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+385,V288,Vesta Anonymised (Set A),2.4e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+386,V274,Vesta Anonymised (Set A),2.3e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+387,V192,Vesta Anonymised (Set A),2.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+388,id_34,Identity (Set B),2.2e-05,False,Interpretable domain / entity attribute
+389,V325,Vesta Anonymised (Set A),2.1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+390,V335,Vesta Anonymised (Set A),2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+391,V235,Vesta Anonymised (Set A),1.9e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+392,id_08,Identity (Set B),1.7e-05,False,Interpretable domain / entity attribute
+393,V183,Vesta Anonymised (Set A),1.7e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+394,V77,Vesta Anonymised (Set A),1.6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+395,V76,Vesta Anonymised (Set A),1.6e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+396,V57,Vesta Anonymised (Set A),1.5e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+397,id_06,Identity (Set B),1.5e-05,False,Interpretable domain / entity attribute
+398,V132,Vesta Anonymised (Set A),1.2e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+399,D14,Timetable / Delta (Set A),1.1e-05,False,Interpretable domain / entity attribute
+400,V160,Vesta Anonymised (Set A),1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+401,V96,Vesta Anonymised (Set A),1e-05,True,"Anonymised structural pattern (behavioral driver, not causal)"
+402,id_05,Identity (Set B),9e-06,False,Interpretable domain / entity attribute
+403,M1,Match Flags (Set A),8e-06,False,Interpretable domain / entity attribute
+404,V313,Vesta Anonymised (Set A),8e-06,True,"Anonymised structural pattern (behavioral driver, not causal)"
+405,M3,Match Flags (Set A),6e-06,False,Interpretable domain / entity attribute
+406,V283,Vesta Anonymised (Set A),6e-06,True,"Anonymised structural pattern (behavioral driver, not causal)"
+407,id_31,Identity (Set B),4e-06,False,Interpretable domain / entity attribute
+408,id_38,Identity (Set B),2e-06,False,Interpretable domain / entity attribute
+409,M4,Match Flags (Set A),2e-06,False,Interpretable domain / entity attribute
+410,V99,Vesta Anonymised (Set A),2e-06,True,"Anonymised structural pattern (behavioral driver, not causal)"
+411,M2,Match Flags (Set A),1e-06,False,Interpretable domain / entity attribute
+412,V84,Vesta Anonymised (Set A),1e-06,True,"Anonymised structural pattern (behavioral driver, not causal)"
+413,id_32,Identity (Set B),0.0,False,Interpretable domain / entity attribute
+414,M6,Match Flags (Set A),0.0,False,Interpretable domain / entity attribute
+415,M5,Match Flags (Set A),0.0,False,Interpretable domain / entity attribute
+416,M9,Match Flags (Set A),0.0,False,Interpretable domain / entity attribute
+417,log_amount,Other Features,0.0,False,Interpretable domain / entity attribute
+418,V93,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+419,V102,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+420,DeviceType,Timetable / Delta (Set A),0.0,False,Interpretable domain / entity attribute
+421,id_37,Identity (Set B),0.0,False,Interpretable domain / entity attribute
+422,V105,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+423,V106,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+424,V123,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+425,V108,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+426,V139,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+427,id_33,Identity (Set B),0.0,False,Interpretable domain / entity attribute
+428,V27,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+429,V36,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+430,V51,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+431,V54,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+432,V75,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+433,V227,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+434,V291,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+435,V14,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+436,V305,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+437,V311,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+438,V7,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+439,V13,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+440,V320,Vesta Anonymised (Set A),0.0,True,"Anonymised structural pattern (behavioral driver, not causal)"
+441,D11,Timetable / Delta (Set A),0.0,False,Interpretable domain / entity attribute
+442,id_24,Identity (Set B),0.0,False,Interpretable domain / entity attribute
+443,card1_cnt_7d,Entity History (Set C1),0.0,False,Interpretable domain / entity attribute
