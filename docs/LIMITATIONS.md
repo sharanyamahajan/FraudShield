@@ -37,3 +37,19 @@ This document details critical real-world limitations, failure modes, and deploy
 ## 5. Security & Test Guard Isolation
 - The test split isolation guard (`src/fraudshield/splits/guard.py`) uses Python call stack inspection (`inspect.stack()`) to prevent inadvertent data leakage during model development.
 - This mechanism is an internal accidental leakage barrier rather than a cryptographic security boundary. It requires standard code review and deployment automation to enforce tamper prevention.
+
+---
+
+## 6. Discrepancy Analysis, Audit Trail & Backtest Structure
+
+### 6.1 Set B PR-AUC Discrepancy: 0.5610 (M3/M4) vs. 0.5222 (M5)
+- **Technical Cause**: In Milestones 3 and 4, models were trained using the scikit-learn API `xgb.XGBClassifier` (which defaults to `objective="binary:logistic"` optimizing log-loss cross-entropy) and ingested raw pandas DataFrames with object columns. In Milestone 5, to overcome RAM exhaustion and achieve 5x training acceleration, training transitioned to the lower-level `xgb.train` API with pre-encoded contiguous `float32` DMatrix inputs. In `xgb.train`, omitting the `objective` parameter defaults to `reg:squarederror` (optimizing mean squared error on $\{0, 1\}$ targets rather than log-loss).
+- **Internal Validity**: Because Set B (0.5222), Set C1 (0.5250), and Set C2 (0.5147) were all trained under the identical `xgb.train` objective and matrix formatting in Milestone 5, the comparative evaluation remains controlled and valid.
+
+### 6.2 Execution Script Commit Audit
+- `docs/ANALYSIS_PLAN.md` was registered and committed at commit `8542751` **before** executing M5 experiments.
+- The pipeline script `scripts/run_milestone5.py` was adapted for memory constraints and speed optimization during execution and was formally committed at commit `1870501` **after** the run concluded.
+
+### 6.3 Backtest Redundancy & Independence of Folds
+- **Fold 2 Duplication**: In the 2-fold rolling-origin backtest, Fold 2 (70% train / 15% val) trained on rows 0 to 413,378 and validated on rows 413,378 to 501,959. This partition window is mathematically identical to the primary validation split.
+- **Independent Folds**: Because Fold 1 and Fold 2 share training data (expanding window) and Fold 2 duplicates the main validation split, the "same sign in every fold" decision rule actually evaluated only **ONE** temporally distinct out-of-sample backtest fold (Fold 1) beyond the main validation split.

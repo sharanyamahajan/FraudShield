@@ -12,16 +12,17 @@ FraudShield is an institutional-grade machine learning system designed for finan
 
 ### 1. Research Question 1 (RQ1): Backward-Looking Entity History Features
 - **Question**: Under strict time-ordered evaluation ($T_{prior} < T_{current}$), do leakage-safe backward-looking entity history features (past 1h/24h/7d counts, timedelta, amount-to-mean ratios) improve PR-AUC over transaction-only features?
-- **Pre-Registered Hypothesis**: Evaluated under pre-registered decision rules in [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md).
+- **Pre-Specified Evaluation**: Evaluated under decision rules pre-specified before the M5 bootstrap and test evaluation in [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md).
 - **Empirical Result**: **`NO RELIABLE GAIN`**.
   - On Validation ($N=88,581$): Paired bootstrap 95% CI for $\Delta \text{PR-AUC}$ was `[-0.0005, +0.0059]` (includes 0).
   - On Held-Out Test ($N=88,581$): Baseline **Set B achieved PR-AUC = 0.4296** vs **Set C1 PR-AUC = 0.4002** ($\Delta = -0.0294$, 95% CI: `[-0.0345, -0.0243]`).
-  - **Conclusion**: Unconditioned proxy card entity counts suffered out-of-time distribution shift; simple transaction core + identity features generalized superiorly.
+  - **Val-to-Test Swing Interpretation**: The performance drop from validation (+0.0027) to test (-0.0294) is treated as a hypothesis (potential entity count distribution drift over time), not a definitive finding.
+  - **Probability Calibration on Test**: Brier score shifted from 0.0290 (uncalibrated) to 0.0319 (isotonic calibrator fit on validation only); the calibration effect on test is small.
 
 ### 2. Research Question 2 (RQ2): Temporal vs. Random Split Degradation
 - **Question**: How much does standard random cross-validation overstate performance versus realistic chronological splitting?
-- **Empirical Result**: **`+12.4 percentage points PR-AUC overstatement`** (`0.6463` vs `0.5222`).
-- **Conclusion**: Random train/val splitting creates massive optimistic leakage due to future-to-past entity lookahead. Temporal evaluation is strictly essential for production fraud engines.
+- **Empirical Result**: **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)** overstatement.
+- **Conclusion**: Random train/val splitting creates massive optimistic leakage due to future-to-past entity lookahead. This shows (single dataset) that temporal evaluation is essential for production fraud risk estimation.
 
 ---
 

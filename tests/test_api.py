@@ -117,6 +117,41 @@ def test_score_endpoint(client):
     assert "recommended_action" in data
 
 
+def test_score_endpoint_missing_fields(client):
+    # Payload with almost all columns missing (only TransactionAmt and card1 provided)
+    payload = {
+        "features": {
+            "TransactionAmt": 99.99,
+            "card1": 5432,
+        }
+    }
+    r = client.post("/api/score", json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert "raw_risk_score" in data
+    assert "calibrated_prob" in data
+    assert 0.0 <= data["calibrated_prob"] <= 1.0
+
+
+def test_score_endpoint_unseen_categories(client):
+    # Payload with novel/unseen categorical values
+    payload = {
+        "features": {
+            "TransactionAmt": 250.0,
+            "ProductCD": "TOTALLY_UNSEEN_PRODUCT",
+            "card4": "novel_crypto_network",
+            "P_emaildomain": "unseen_domain_99.biz",
+            "addr1": 999.0,
+        }
+    }
+    r = client.post("/api/score", json=payload)
+    assert r.status_code == 200
+    data = r.json()
+    assert "raw_risk_score" in data
+    assert "calibrated_prob" in data
+    assert 0.0 <= data["calibrated_prob"] <= 1.0
+
+
 def test_experiments_endpoints(client):
     r_rq2 = client.get("/api/experiments/rq2")
     assert r_rq2.status_code == 200

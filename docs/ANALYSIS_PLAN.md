@@ -1,7 +1,14 @@
 # FraudShield: Milestone 5 Rigorous Statistical Evaluation & Analysis Plan
 
 > [!IMPORTANT]
-> This analysis plan is registered and committed to version control **prior** to executing Milestone 5 experiments. All hypotheses, comparison baselines, primary metrics, statistical decision rules, sensitivity checks, and backtest partitioning schemes are locked herein. Under no circumstances will hypotheses or decision rules be altered post hoc after observing empirical results.
+> This analysis plan was pre-specified and committed to version control (`8542751`) **before** running the M5 paired bootstrap inference, multi-seed variance benchmark, rolling backtest, and held-out test evaluation. All hypotheses, comparison baselines, primary metrics, statistical decision rules, sensitivity checks, and backtest partitioning schemes were locked herein. Under no circumstances were hypotheses or decision rules altered post hoc after observing empirical results.
+
+### Pre-Specification & Execution Timeline
+- **2026-10-22 18:34 UTC (Commit `e14272f`)**: Milestone 4 completed. Single-fit validation point estimates for Set B (0.5610) and Set C1 (0.5675) were recorded in `reports/history_val.json`.
+- **2026-10-22 19:30 UTC (Commit `8542751`)**: This formal Analysis Plan was authored, registered, and committed. *Audit Disclosure*: While preliminary point estimates from M4 validation existed prior to committing this plan, the formal statistical decision criteria (paired bootstrap 95% CI strictly excluding zero, rolling backtest fold sign consistency, and RQ2 random split leakage measurement) were locked before executing multi-seed runs, bootstrap resampling, backtest evaluations, or unlocking the test split.
+- **2026-10-22 23:46 UTC**: 500-sample paired bootstrap on validation completed (`reports/m5_paired_bootstrap.json`).
+- **2026-10-23 00:16 UTC**: Rolling-origin backtest completed (`reports/m5_rolling_backtest.json`).
+- **2026-10-23 00:53 UTC (Commit `9d63084`)**: Authorized single final test set evaluation completed (`reports/test_evaluation_summary.json`).
 
 ---
 

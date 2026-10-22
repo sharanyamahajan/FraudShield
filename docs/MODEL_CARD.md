@@ -1,5 +1,8 @@
 # FraudShield Model Card
 
+> [!NOTE]
+> **Demo only: no auth, returns labels, not production-ready.**
+
 Following the Model Cards for Model Reporting framework (Mitchell et al., 2019).
 
 ---
@@ -35,13 +38,16 @@ Following the Model Cards for Model Reporting framework (Mitchell et al., 2019).
 ## 4. Evaluation Metrics & Performance
 - **Primary Performance Metric**: PR-AUC (Average Precision).
 - **Secondary Metrics**: ROC-AUC, Brier Calibration Score, Recall & Precision at 0.5%, 1.0%, 2.0%, 5.0% manual review capacity budgets.
+- **Evaluation Plan**: Pre-specified before the M5 bootstrap and test evaluation in [`docs/ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md).
 
 ### Out-of-Time Test Performance ($N=88,581$):
 - **Test PR-AUC**: `0.400179` (Set C1) vs `0.429595` (Baseline Set B).
-- **Test ROC-AUC**: `0.874754`.
-- **Calibrated Brier Score**: `0.031882`.
+- **Test ROC-AUC**: `0.874754` (Set C1) vs `0.870473` (Set B).
+- **Test Brier Score**: `0.029021` (uncalibrated) vs `0.031882` (calibrated with Isotonic regression fit on validation); the calibration effect on test is small.
 - **Top 0.5% Capacity Tier**: Cutoff $\ge 0.8684$ $\rightarrow$ 94.37% Precision, 15.76% Fraud Capture Rate (FPR = 0.03%).
 - **Top 1.0% Capacity Tier**: Cutoff $\ge 0.6139$ $\rightarrow$ 47.93% Precision, 27.08% Fraud Capture Rate (FPR = 1.06%).
+- **Val-to-Test Swing**: The swing in relative performance from validation (+0.0027) to test (-0.0294) is treated as a hypothesis (entity drift), not a definitive finding.
+- **RQ2 Generalization Gap**: Random 70/15 splitting overstates PR-AUC by **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)**, which shows (single dataset) the danger of non-temporal evaluation.
 
 ---
 

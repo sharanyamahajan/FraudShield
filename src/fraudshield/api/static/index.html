@@ -175,7 +175,7 @@
         <!-- 2. MODEL COMPARISON & RQ2 TAB -->
         <div id="tab-comparison" class="tab-pane">
             <div class="disclaimer-box">
-                <strong>Empirical Scientific Finding (RQ1 & RQ2):</strong> Set C1 (backward-looking entity history) did not produce reliable gains over Set B under strict temporal evaluation. Furthermore, random split cross-validation overstates PR-AUC by <strong>+12.4 percentage points</strong> due to temporal lookahead leakage.
+                <strong>Empirical Scientific Finding (RQ1 & RQ2):</strong> Set C1 (backward-looking entity history) did not produce reliable gains over Set B under strict temporal evaluation. Furthermore, random split cross-validation overstates PR-AUC by <strong>+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)</strong> due to temporal lookahead leakage, which shows (single dataset) the necessity of chronological validation.
             </div>
 
             <div class="grid-2">
@@ -223,7 +223,7 @@
                         </tbody>
                     </table>
                     <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
-                        <strong>Paired Bootstrap Result (500 resamples):</strong> 95% CI for $\Delta \text{PR-AUC} (\text{C1} - \text{B})$ includes 0 on validation (`[-0.0005, +0.0059]`) and is negative on test (`[-0.0345, -0.0243]`). Pre-registered decision rule strictly satisfied.
+                        <strong>Paired Bootstrap Result (500 resamples):</strong> 95% CI for $\Delta \text{PR-AUC} (\text{C1} - \text{B})$ includes 0 on validation (`[-0.0005, +0.0059]`) and is negative on test (`[-0.0345, -0.0243]`). Pre-specified decision rule strictly satisfied. The val-to-test swing is evaluated as a hypothesis (entity drift), not a finding.
                     </div>
                 </div>
             </div>
@@ -336,7 +336,7 @@
                 <ul style="padding-left: 1.5rem; margin-bottom: 1.25rem;">
                     <li><strong>Strict Temporal Partitioning (70/15/15)</strong>: Train, validation, and test splits strictly follow transaction timestamp order. No row from the future can influence the past.</li>
                     <li><strong>Sealed Test Split Security Guard</strong>: The held-out test split is sealed behind runtime call stack verification (`inspect.stack()`) and unauthorized access attempts throw `PrematureTestAccessError`. Authorized evaluations are permanently logged.</li>
-                    <li><strong>Pre-Registered Decision Rules</strong>: All hypotheses and primary comparisons were locked in <code>docs/ANALYSIS_PLAN.md</code> prior to empirical testing. Negative results (Set C1 failure to beat Set B) are reported honestly.</li>
+                    <li><strong>Decision Rules Pre-Specified Before Evaluation</strong>: Hypotheses and comparison criteria were locked in <code>docs/ANALYSIS_PLAN.md</code> prior to empirical testing. Negative results (Set C1 failure to beat Set B) are reported honestly.</li>
                     <li><strong>Isotonic Probability Calibration</strong>: Model scores are calibrated on validation to produce reliable posterior probabilities for downstream financial risk calculations.</li>
                 </ul>
             </div>
