@@ -1,0 +1,5 @@
+feature_set,model_name,variant,max_iter,n_iter,converged,fit_time_seconds,pr_auc,roc_auc,brier_score,recall_top_0.5pct,recall_top_1.0pct,recall_top_2.0pct,recall_top_5.0pct,precision_top_1.0pct,fpr_top_1.0pct
+Set A,Logistic Regression,class_weight=None,2000,37,True,8.6,0.156717,0.769711,0.030994,0.04931,0.097304,0.173899,0.305062,0.334086,0.006897
+Set B,Logistic Regression,class_weight=None,2000,388,True,515.3,0.427666,0.845139,0.025015,0.134451,0.228797,0.332018,0.501972,0.785553,0.002221
+Set C1,Logistic Regression,class_weight=None,2000,336,True,426.8,0.429028,0.849257,0.025017,0.134122,0.228139,0.33432,0.504931,0.783296,0.002245
+Set C2,Logistic Regression,class_weight=None,2000,336,True,538.5,0.429209,0.846119,0.024973,0.134122,0.229783,0.331032,0.504274,0.788939,0.002186

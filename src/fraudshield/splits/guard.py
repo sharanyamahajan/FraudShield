@@ -52,9 +52,17 @@ def _inspect_call_stack_for_authorization() -> Tuple[bool, str]:
     return False, caller_path
 
 
-def _log_authorized_test_access(caller_path: str, split_name: str, feature_set: str, file_path: Path) -> None:
-    """Log authorized test split access to reports/test_access_log.txt."""
-    log_file = Path("reports/test_access_log.txt")
+def _log_authorized_test_access(
+    caller_path: str,
+    split_name: str,
+    feature_set: str,
+    file_path: Path,
+    log_file: Optional[Path] = None,
+) -> None:
+    """Log authorized test split access to reports/test_access_log.txt or a specified log file."""
+    if log_file is None:
+        log_file = Path("reports/test_access_log.txt")
+    log_file = Path(log_file)
     log_file.parent.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     entry = (
@@ -70,6 +78,7 @@ def load_split_parquet(
     split_name: str,
     feature_set: str = "a",
     base_dir: Path = Path("data/processed"),
+    log_file: Optional[Path] = None,
 ) -> pd.DataFrame:
     """Load processed parquet for a given split, strictly enforcing test set isolation.
     
@@ -81,6 +90,8 @@ def load_split_parquet(
         'a', 'b', 'c1', or 'c2'.
     base_dir : Path
         Directory containing processed parquets.
+    log_file : Optional[Path]
+        Log file path for authorized test split access (defaults to reports/test_access_log.txt).
     """
     split_lower = split_name.lower().strip()
     target_file = Path(base_dir) / f"{split_lower}_set_{feature_set.lower()}.parquet"
@@ -96,7 +107,7 @@ def load_split_parquet(
             logger.error(msg)
             raise PrematureTestAccessError(msg)
 
-        _log_authorized_test_access(caller_path, split_name, feature_set, target_file)
+        _log_authorized_test_access(caller_path, split_name, feature_set, target_file, log_file=log_file)
 
     if not target_file.exists():
         raise FileNotFoundError(f"Processed file not found: {target_file}")

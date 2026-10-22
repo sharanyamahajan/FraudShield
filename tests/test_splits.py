@@ -3,6 +3,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from fraudshield.splits.temporal import create_temporal_splits, find_next_distinct_boundary
 
 
@@ -103,31 +104,53 @@ def test_premature_test_split_access_guard_raises_error():
 
 
 def test_authorized_call_to_test_split_logs_and_loads(tmp_path):
-    """Verify that an authorized evaluator module in the call stack can load the test split and logs access."""
+    """Verify that an authorized evaluator module in the call stack can load a test split and logs access
+    to a temporary log path without touching reports/test_access_log.txt.
+    """
     from pathlib import Path
     from fraudshield.splits.guard import load_split_parquet
 
-    # Create dummy test parquet in tmp_path
+    # Create dummy test parquet in tmp_path (NEVER use real test split)
     dummy_df = pd.DataFrame({"TransactionID": [1, 2], "isFraud": [0, 1]})
     test_parquet_path = tmp_path / "test_set_a.parquet"
     dummy_df.to_parquet(test_parquet_path, index=False)
+    temp_log_path = tmp_path / "temp_test_access_log.txt"
 
     # Execute a function inside a frame with filename 'final_evaluator.py'
-    code = compile("df = load_split_parquet('test', feature_set='a', base_dir=tmp_path)", "final_evaluator.py", "exec")
+    code = compile(
+        "df = load_split_parquet('test', feature_set='a', base_dir=tmp_path, log_file=temp_log_path)",
+        "final_evaluator.py",
+        "exec"
+    )
     exec_scope = {
         "load_split_parquet": load_split_parquet,
         "tmp_path": tmp_path,
+        "temp_log_path": temp_log_path,
     }
     exec(code, exec_scope)
     loaded = exec_scope["df"]
     assert len(loaded) == 2
 
-    # Verify that reports/test_access_log.txt was written
-    log_path = Path("reports/test_access_log.txt")
-    assert log_path.exists()
-    content = log_path.read_text(encoding="utf-8")
+    # Verify that the temporary log was written and tracked log was NOT written to
+    assert temp_log_path.exists()
+    content = temp_log_path.read_text(encoding="utf-8")
     assert "AUTHORIZED TEST ACCESS" in content
     assert "final_evaluator.py" in content
+
+
+def test_pytest_leaves_tracked_test_access_log_unchanged(tmp_path):
+    """Assert that running tests leaves the tracked reports/test_access_log.txt strictly unchanged."""
+    log_path = Path("reports/test_access_log.txt")
+    if not log_path.exists():
+        return
+    initial_bytes = log_path.read_bytes()
+
+    # Execute authorized test call with temporary directory fixture
+    test_authorized_call_to_test_split_logs_and_loads(tmp_path)
+
+    # Assert tracked production log remains byte-for-byte identical
+    after_bytes = log_path.read_bytes()
+    assert initial_bytes == after_bytes, "reports/test_access_log.txt was modified during test execution!"
 
 
 def test_static_analysis_no_unauthorized_module_references_test_split():

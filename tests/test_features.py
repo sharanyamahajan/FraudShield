@@ -29,7 +29,7 @@ def mock_transaction_dataframe():
         "addr1": [315.0, np.nan, 315.0, 420.0, 315.0],
         "addr2": [87.0, 87.0, 87.0, 87.0, 87.0],
         "dist1": [10.0, np.nan, 5.0, np.nan, 12.0],
-        "dist2": [np.nan, np.nan, np.nan, np.nan, np.nan],
+        "dist2": [15.0, np.nan, np.nan, np.nan, np.nan],
         "P_emaildomain": ["gmail.com", "yahoo.com", "gmail.com", "anonymous.info", np.nan],
         "R_emaildomain": [np.nan, "gmail.com", np.nan, np.nan, "hotmail.com"],
         # Anonymised and identity columns
