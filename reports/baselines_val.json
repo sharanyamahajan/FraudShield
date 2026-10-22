@@ -1,9 +1,15 @@
 {
-  "run_id": "484489e8",
-  "git_commit_hash": "c5b06c5",
+  "run_id": "b1d49e7e",
+  "git_commit_hash": "14c89d5",
   "is_git_dirty": false,
   "seed": 42,
-  "timestamp": "2026-10-21T18:37:50Z",
+  "timestamp": "2026-10-22T11:47:30Z",
+  "parquet_sha256": {
+    "train_set_a": "1291f4902b8af5375788653218525149c0c399b5b4c0644026e96b7346189bc7",
+    "val_set_a": "77a1745068bbe20ea1e631705ddee89568403ab341c396033b4d174a6b5d297e",
+    "train_set_b": "181111cc6c73145b0692ffb82923b752590eb3214876fb27321c99dfe54e4d14",
+    "val_set_b": "12596c6139e556ee844d80fedc96a98f27b1a6e23bdbf56e8d67050d8ef73287"
+  },
   "config_snapshot": {
     "project_name": "FraudShield",
     "seed": 42,
@@ -91,8 +97,8 @@
   },
   "results": [
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set A",
       "model_name": "Logistic Regression",
@@ -100,6 +106,8 @@
       "pr_auc": 0.156717,
       "roc_auc": 0.769711,
       "brier_score": 0.030994,
+      "n_iter": 37,
+      "converged": true,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -118,8 +126,8 @@
       "fpr_top_5.0pct": 0.040929
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set A",
       "model_name": "Logistic Regression",
@@ -127,6 +135,8 @@
       "pr_auc": 0.148885,
       "roc_auc": 0.77193,
       "brier_score": 0.170539,
+      "n_iter": 50,
+      "converged": true,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -145,8 +155,8 @@
       "fpr_top_5.0pct": 0.041373
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set A",
       "model_name": "Isolation Forest",
@@ -154,6 +164,8 @@
       "pr_auc": 0.068996,
       "roc_auc": 0.669998,
       "brier_score": 0.174965,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -172,8 +184,8 @@
       "fpr_top_5.0pct": 0.047008
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set A",
       "model_name": "XGBoost",
@@ -181,6 +193,8 @@
       "pr_auc": 0.269465,
       "roc_auc": 0.837289,
       "brier_score": 0.028794,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -199,8 +213,8 @@
       "fpr_top_5.0pct": 0.037503
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set A",
       "model_name": "XGBoost",
@@ -208,6 +222,8 @@
       "pr_auc": 0.235816,
       "roc_auc": 0.841107,
       "brier_score": 0.116734,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -226,8 +242,8 @@
       "fpr_top_5.0pct": 0.038158
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set B",
       "model_name": "Logistic Regression",
@@ -235,6 +251,8 @@
       "pr_auc": 0.423044,
       "roc_auc": 0.843055,
       "brier_score": 0.025142,
+      "n_iter": 300,
+      "converged": false,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -253,8 +271,8 @@
       "fpr_top_5.0pct": 0.03416
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set B",
       "model_name": "Logistic Regression",
@@ -262,6 +280,8 @@
       "pr_auc": 0.413955,
       "roc_auc": 0.84578,
       "brier_score": 0.118822,
+      "n_iter": 300,
+      "converged": false,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -280,8 +300,8 @@
       "fpr_top_5.0pct": 0.034113
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set B",
       "model_name": "Isolation Forest",
@@ -289,6 +309,8 @@
       "pr_auc": 0.171563,
       "roc_auc": 0.756022,
       "brier_score": 0.112131,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -307,8 +329,8 @@
       "fpr_top_5.0pct": 0.041478
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set B",
       "model_name": "XGBoost",
@@ -316,6 +338,8 @@
       "pr_auc": 0.56098,
       "roc_auc": 0.907635,
       "brier_score": 0.021289,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,
@@ -334,8 +358,8 @@
       "fpr_top_5.0pct": 0.030501
     },
     {
-      "run_id": "484489e8",
-      "git_hash": "c5b06c5",
+      "run_id": "b1d49e7e",
+      "git_hash": "14c89d5",
       "is_git_dirty": false,
       "feature_set": "Set B",
       "model_name": "XGBoost",
@@ -343,6 +367,8 @@
       "pr_auc": 0.536741,
       "roc_auc": 0.908716,
       "brier_score": 0.07187,
+      "n_iter": null,
+      "converged": null,
       "max_achievable_recall_top_0.5pct": 0.145628,
       "max_achievable_recall_top_1.0pct": 0.291256,
       "max_achievable_recall_top_2.0pct": 0.582512,

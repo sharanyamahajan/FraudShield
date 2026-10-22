@@ -1,0 +1,34 @@
+{
+  "row_share_with_ge_10_prior_txns": {
+    "train": {
+      "total_rows": 413378,
+      "card1_rows_ge_10": 352454,
+      "card1_share_pct": 85.26,
+      "card1_addr1_rows_ge_10": 281992,
+      "card1_addr1_share_pct": 68.22
+    },
+    "val": {
+      "total_rows": 88581,
+      "card1_rows_ge_10": 83248,
+      "card1_share_pct": 93.98,
+      "card1_addr1_rows_ge_10": 74323,
+      "card1_addr1_share_pct": 83.9
+    },
+    "test": {
+      "total_rows": 88581,
+      "card1_rows_ge_10": 83803,
+      "card1_share_pct": 94.61,
+      "card1_addr1_rows_ge_10": 75824,
+      "card1_addr1_share_pct": 85.6
+    }
+  },
+  "card1_percentiles": {
+    "unique_entities": 13553,
+    "median": 4.0,
+    "p75": 14.0,
+    "p90": 46.0,
+    "p95": 107.0,
+    "p99": 786.4399999999987,
+    "max": 14932
+  }
+}

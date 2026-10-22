@@ -141,7 +141,25 @@ def run_features(args: argparse.Namespace) -> int:
 
 
 def run_train(args: argparse.Namespace) -> int:
-    """Train baseline models on Set A and Set B evaluated on validation split (Milestone 3)."""
+    """Train baseline models on Set A and Set B, or evaluate Set C history features."""
+    if getattr(args, "history", False):
+        from fraudshield.models.train_history import run_history_validation
+
+        logger.info("Executing 'train --history' command (Milestone 4)...")
+        df_results = run_history_validation()
+        print("\n" + "=" * 100)
+        print("MILESTONE 4: VALIDATION PERFORMANCE (Set B vs. Set C1 vs. Set C2)")
+        print("=" * 100)
+        display_cols = [
+            "feature_set", "model_name", "pr_auc", "roc_auc",
+            "recall_top_0.5pct", "recall_top_1.0pct", "recall_top_2.0pct", "recall_top_5.0pct",
+            "precision_top_1.0pct", "fpr_top_1.0pct"
+        ]
+        print(df_results[display_cols].to_string(index=False))
+        print("=" * 100 + "\n")
+        logger.info("Milestone 4 history validation evaluation complete.")
+        return 0
+
     from fraudshield.models.train_baselines import run_validation_baselines
 
     logger.info("Executing 'train' command (Milestone 3)...")
@@ -208,6 +226,7 @@ def main(argv=None) -> int:
 
     # Command: train
     parser_train = subparsers.add_parser("train", help="Train baseline and XGBoost models")
+    parser_train.add_argument("--history", action="store_true", help="Evaluate Milestone 4 history feature sets (Set B vs. C1 vs. C2)")
     parser_train.set_defaults(func=run_train)
 
     # Command: evaluate

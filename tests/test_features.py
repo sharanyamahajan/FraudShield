@@ -264,5 +264,32 @@ def test_real_processed_parquet_schema_and_preprocessor_output_width():
     assert expected_width_b == 899
     assert out_b.shape[1] == expected_width_b
 
+    # 3. Test Set C1 schema and output width
+    path_c1 = Path("data/processed/train_set_c1.parquet")
+    if path_c1.exists():
+        df_c1 = pd.read_parquet(path_c1).head(500)
+        feat_cols_c1 = get_model_feature_columns(df_c1)
+        cats_c1 = [c for c in feat_cols_c1 if c in ALL_RAW_CATEGORICAL_COLS]
+        nums_c1 = [c for c in feat_cols_c1 if c not in ALL_RAW_CATEGORICAL_COLS]
+        assert len(nums_c1) == 412  # 403 + 9 history features
+        assert len(cats_c1) == 31
+        prep_c1 = LinearPreprocessor().fit(df_c1[feat_cols_c1])
+        out_c1 = prep_c1.transform(df_c1[feat_cols_c1])
+        assert out_c1.shape[1] == 412 * 2 + 31 * 3  # 917
+
+    # 4. Test Set C2 schema and output width
+    path_c2 = Path("data/processed/train_set_c2.parquet")
+    if path_c2.exists():
+        df_c2 = pd.read_parquet(path_c2).head(500)
+        feat_cols_c2 = get_model_feature_columns(df_c2)
+        cats_c2 = [c for c in feat_cols_c2 if c in ALL_RAW_CATEGORICAL_COLS]
+        nums_c2 = [c for c in feat_cols_c2 if c not in ALL_RAW_CATEGORICAL_COLS]
+        assert len(nums_c2) == 411  # 403 + 8 history features
+        assert len(cats_c2) == 31
+        prep_c2 = LinearPreprocessor().fit(df_c2[feat_cols_c2])
+        out_c2 = prep_c2.transform(df_c2[feat_cols_c2])
+        assert out_c2.shape[1] == 411 * 2 + 31 * 3  # 915
+
+
 
 
