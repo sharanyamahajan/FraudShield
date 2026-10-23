@@ -56,8 +56,8 @@ def get_db_connection() -> sqlite3.Connection:
 async def lifespan(app: FastAPI):
     """Load model, preprocessor, and calibration assets at startup."""
     models_dir = Path("models")
-    model_file = models_dir / "xgb_set_c1.json"
-    prep_file = models_dir / "preprocessor_c1.pkl"
+    model_file = models_dir / "xgb_set_b.json"
+    prep_file = models_dir / "preprocessor_b.pkl"
     calib_file = models_dir / "calibrator.pkl"
 
     if model_file.exists():
@@ -96,10 +96,10 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning("Could not pre-load operating thresholds: %s", e)
         model_state["operating_thresholds"] = {
-            "top_0.5pct": 0.868444,
-            "top_1.0pct": 0.613925,
-            "top_2.0pct": 0.266463,
-            "top_5.0pct": 0.115361,
+            "top_0.5pct": 0.9370,
+            "top_1.0pct": 0.7191,
+            "top_2.0pct": 0.2726,
+            "top_5.0pct": 0.0904,
         }
 
     yield

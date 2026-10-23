@@ -12,22 +12,18 @@ FraudShield is an institutional-grade machine learning system designed for finan
 
 ### 1. Research Question 1 (RQ1): Backward-Looking Entity History Features
 - **Question**: Under strict time-ordered evaluation ($T_{prior} < T_{current}$), do leakage-safe backward-looking entity history features (past 1h/24h/7d counts, timedelta, amount-to-mean ratios) improve PR-AUC over transaction-only features?
-- **Pre-Specified Evaluation**: Evaluated under decision rules pre-specified before the M5 bootstrap and test evaluation in [`docs/ANALYSIS_PLAN.md`](docs/ANALYSIS_PLAN.md).
-- **Empirical Result**: **`NO RELIABLE GAIN`**.
+- **Primary Result**: **For the pipeline actually run (reg:squarederror, unintended), the pre-specified rule gives NO RELIABLE GAIN for C1 over B (val PR-AUC CI spans zero; test PR-AUC delta -0.029)**.
   - On Validation ($N=88,581$): Paired bootstrap 95% CI for $\Delta \text{PR-AUC}$ was `[-0.0005, +0.0059]` (includes 0).
   - On Held-Out Test ($N=88,581$): Baseline **Set B achieved PR-AUC = 0.4296** vs **Set C1 PR-AUC = 0.4002** ($\Delta = -0.0294$, 95% CI: `[-0.0345, -0.0243]`).
   - **Val-to-Test Swing Interpretation**: The performance drop from validation (+0.0027) to test (-0.0294) is treated as a hypothesis (potential entity count distribution drift over time), not a definitive finding.
   - **Probability Calibration on Test**: Calibration worsened test Brier score from 0.0290 (uncalibrated) to 0.0319 (isotonic calibrator fit on validation only) under out-of-time distribution drift; the effect is small (+0.00286).
-  - **Served Model**: The API serves the Primary Model (Set C1) with raw scores and calibrated probabilities.
+- **Sensitivity Result**: **With binary:logistic, validation C1-B PR-AUC = +0.0079, CI [+0.0048, +0.0112] excludes zero, while Recall@1% delta = -0.0026, CI [-0.0060, +0.0003]. No logistic test result exists.**
+- **Decision Rule Dependence**: The pre-specified rule's outcome depends on the objective. Under squared-error, validation CI spans zero; under logistic, validation PR-AUC CI excludes zero, while operational recall shows no gain.
+- **Served Production Model**: The production API serves **Baseline Model Set B** (Test PR-AUC = 0.4296) because B beat C1 on the held-out test split (0.4296 vs. 0.4002). Model C1 did not beat Model B on test.
 
 ### 2. Research Question 2 (RQ2): Temporal vs. Random Split Degradation
 - **Question**: How much does standard random cross-validation overstate performance versus realistic chronological splitting?
-- **Empirical Result**: **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)** overstatement.
-- **Conclusion**: Random train/val splitting creates massive optimistic leakage due to future-to-past entity lookahead. This shows (single dataset) that temporal evaluation is essential for production fraud risk estimation.
-
-### 2. Research Question 2 (RQ2): Temporal vs. Random Split Degradation
-- **Question**: How much does standard random cross-validation overstate performance versus realistic chronological splitting?
-- **Empirical Result**: **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)** overstatement.
+- **Empirical Result**: **+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)** under `reg:squarederror`, and **+13.43 percentage points (0.6960 vs 0.5617 PR-AUC)** under `binary:logistic`.
 - **Conclusion**: Random train/val splitting creates massive optimistic leakage due to future-to-past entity lookahead. This shows (single dataset) that temporal evaluation is essential for production fraud risk estimation.
 
 ---
@@ -89,7 +85,7 @@ Operating points are fixed on Validation ($\theta$) and evaluated on the held-ou
 
 > **Rank-Based vs. Threshold-Based Precision Confirmation**:
 > - **Rank-Based Precision** (reviewing strictly the top $N \times b$ transactions by descending risk score):
->   - Baseline Set B at top 1.0% capacity (top 886 transactions): **86.00% precision** (860 true frauds).
+>   - Baseline Set B at top 1.0% capacity (top 886 transactions): **86.00% precision** (~762 true frauds, exactly 762 of 886 rows).
 >   - Primary Set C1 at top 1.0% capacity (top 886 transactions): **72.69% precision** (644 true frauds).
 > - **Threshold-Based Precision** (flagging all transactions with score $\ge \theta$ determined on validation):
 >   - Because score distributions shifted out-of-time on the test split, the validation cutoff $\theta \ge 0.6139$ flagged **1,742 transactions (~1.97% volume)** instead of 886, capturing 835 frauds with **47.93% precision**.

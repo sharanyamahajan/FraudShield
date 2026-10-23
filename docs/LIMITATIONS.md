@@ -42,23 +42,29 @@ This document details critical real-world limitations, failure modes, and deploy
 
 ## 6. Discrepancy Analysis, Audit Trail & Backtest Structure
 
-### 6.1 Set B PR-AUC Discrepancy: 0.5610 (M3/M4) vs. 0.5222 (M5)
-- **Technical Cause (Unintended Deviation)**: In Milestones 3 and 4, models were trained using `xgb.XGBClassifier`, which defaults to `objective="binary:logistic"` optimizing log-loss cross-entropy. In Milestone 5, to overcome peak RAM bloat and achieve 5x training acceleration with contiguous `float32` DMatrix arrays, the script switched to the low-level `xgb.train` API. Omitting the `objective` parameter in `xgb.train` caused XGBoost to default to `reg:squarederror` (optimizing mean squared error on $\{0, 1\}$ targets). **This was an unintended deviation, not an intentional speed optimization.**
+### 6.1 Objective Function & Verdict Discrepancy Analysis
+- **Primary Result**: **For the pipeline actually run (reg:squarederror, unintended), the pre-specified rule gives NO RELIABLE GAIN for C1 over B (val PR-AUC CI spans zero; test PR-AUC delta -0.029)**.
+- **Sensitivity Result**: **With binary:logistic, validation C1-B PR-AUC = +0.0079, CI [+0.0048, +0.0112] excludes zero, while Recall@1% delta = -0.0026, CI [-0.0060, +0.0003]. No logistic test result exists.**
+- **Decision Rule Dependence on Objective**: The pre-specified decision rule's outcome depends on the objective function. Under squared-error, validation PR-AUC CI spans zero; under logistic, validation PR-AUC CI strictly excludes zero. Recall@1% is reported as secondary context and is not substituted for the pre-specified PR-AUC criterion.
+- **Technical Cause (Unintended Deviation)**: In Milestones 3 and 4, models were trained using `xgb.XGBClassifier`, which defaults to `objective="binary:logistic"` optimizing log-loss cross-entropy. In Milestone 5, to overcome peak RAM bloat and achieve training acceleration with contiguous `float32` DMatrix arrays, the script switched to the low-level `xgb.train` API. Omitting the `objective` parameter in `xgb.train` caused XGBoost to default to `reg:squarederror` (optimizing mean squared error on $\{0, 1\}$ targets). **This was an unintended deviation, not an intentional speed optimization.**
 - **Validation Score Impact**: The M3/M4 logistic models scored higher on validation (`0.5610` for Set B and `0.5675` for Set C1) than the squared-error models (`0.5222` for Set B and `0.5250` for Set C1).
-- **Validation-Only Logistic Recomputation**: A follow-up validation-only benchmark (`reports/validation_logistic_benchmark.json`) confirmed this discrepancy. Re-running Set B and Set C1 with `objective="binary:logistic"` under identical hyperparameters restored validation PR-AUC to `0.561701` for Set B and `0.569598` for Set C1.
+- **Validation-Only Logistic Recomputation**: A follow-up validation-only benchmark (`reports/validation_logistic_benchmark.json`) confirmed this discrepancy. Re-running Set B and Set C1 with `objective="binary:logistic"` under identical hyperparameters restored validation PR-AUC to `0.561701` for Set B and `0.569598` for Set C1. The rolling backtest and multi-seed stability runs were not repeated under logistic.
 - **Side-by-Side Validation 95% Confidence Intervals (500 Resamples, C1 - B)**:
   - `reg:squarederror` (M5 Production Run): $\Delta \text{PR-AUC} = +0.002740$, 95% CI: **`[-0.000483, +0.005893]`** (spans zero).
-  - `binary:logistic` (Audit Run): $\Delta \text{PR-AUC} = +0.007898$, 95% CI: **`[+0.004832, +0.011221]`** (strictly positive).
-  - *Operational Recall*: Even under `binary:logistic`, at the top 1.0% review budget, $\Delta \text{Recall@1.0\%} = -0.002630$ (95% CI `[-0.006008, +0.000340]`), confirming that entity history did not improve fraud capture at operational review capacity.
-  - *RQ2 Gap with Logistic*: Random split Set B achieved `0.695991` vs. Temporal Set B `0.561701`, yielding a **+13.43 percentage point overstatement** (+0.134290).
-- **Deployed Models & Clipping**:
-  - The downstream test evaluation, API, SHAP, and calibration utilize `models/xgb_set_c1.json` (Set C1) and `models/xgb_set_b.json` (Set B baseline), which were trained under `reg:squarederror`.
-  - In both `scripts/evaluate_test.py` and `src/fraudshield/api/main.py`, raw scores are explicitly clipped to $[0, 1]$ (`np.clip(score, 1e-6, 1.0 - 1e-6)`) before calibration and Brier evaluation.
+  - `binary:logistic` (Sensitivity Benchmark): $\Delta \text{PR-AUC} = +0.007898$, 95% CI: **`[+0.004832, +0.011221]`** (strictly positive).
+  - *Secondary Recall@1%*: $\Delta \text{Recall@1.0\%} = -0.002630$, 95% CI: `[-0.006008, +0.000340]`.
+  - *RQ2 Gap with Logistic vs Squared-Error*: Random split overstates PR-AUC by **+12.4 pp** under squared-error (`0.646` vs. `0.522`), and by **+13.43 pp** under logistic (`0.6960` vs. `0.5617`).
+- **Deployed Model & Production Serving**:
+  - The downstream production API, SHAP explainability, and calibration serve **Baseline Model Set B** (`models/xgb_set_b.json`), because Set B achieved superior out-of-time test performance (PR-AUC 0.4296 vs. 0.4002). Model Set C1 did not beat Model Set B on test.
+  - In both `scripts/evaluate_test.py` and `src/fraudshield/api/main.py`, raw scores are explicitly clipped to $[0, 1]$ (`np.clip(score, 1e-6, 1.0 - 1e-6)`) before calibration and evaluation.
 
-### 6.2 Execution Script Commit Audit
-- `docs/ANALYSIS_PLAN.md` was registered and committed at commit `8542751` **before** executing M5 experiments.
-- The pipeline script `scripts/run_milestone5.py` was adapted for memory constraints and speed optimization during execution and was formally committed at commit `1870501` **after** the run concluded.
+### 6.2 Execution Script Commit Audit & Test Split Sealing
+- **Analysis Plan Locked Pre-Run**: `docs/ANALYSIS_PLAN.md` was registered and committed at commit `8542751` at `14:01:28 UTC` (`19:31:28 IST`), well **before** executing M5 experiments.
+- **Uncommitted Pipeline Script**: `scripts/run_milestone5.py` was adapted for memory constraints and speed optimization during execution and ran from an uncommitted working tree; therefore, `is_git_dirty=true` is recorded in all M5 report metadata files. The script was formally committed at `1870501` along with M5 results.
+- **Test Access Log Cleanup**: `reports/test_access_log.txt` was edited in commit `719d51e` to remove transient pytest test fixture entries; the original log lines with temporary test invocations are preserved in Git history (`0317c1f` and earlier). The real log now contains exclusively the two authorized production test accesses.
+- **Single Test Split Read**: The held-out test split was read strictly once (at `19:18:17 UTC` / `00:48:17 IST`), after `docs/ANALYSIS_PLAN.md` was committed and after Milestone 5 was finalized.
 
 ### 6.3 Backtest Redundancy & Independence of Folds
 - **Fold 2 Duplication**: In the 2-fold rolling-origin backtest, Fold 2 (70% train / 15% val) trained on rows 0 to 413,378 and validated on rows 413,378 to 501,959. This partition window is mathematically identical to the primary validation split.
 - **Independent Folds**: Because Fold 1 and Fold 2 share training data (expanding window) and Fold 2 duplicates the main validation split, the "same sign in every fold" decision rule actually evaluated only **ONE** temporally distinct out-of-sample backtest fold (Fold 1) beyond the main validation split.
+- **No Logistic Backtest**: The rolling backtest was evaluated under `reg:squarederror` and was not repeated under `binary:logistic`.

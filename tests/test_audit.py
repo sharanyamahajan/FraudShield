@@ -90,22 +90,66 @@ def test_dashboard_kpis_do_not_mix_models():
     grids = html_text.split('<div class="kpi-grid"')
     assert len(grids) >= 3, "Expected at least 2 KPI grids in overview"
 
-    # Grid 1: Primary Model (Set C1)
-    grid_c1 = grids[1].split('</div>\n            </div>')[0]
-    assert "Set C1 Test PR-AUC" in grid_c1
-    assert "Set C1 Test ROC-AUC" in grid_c1
-    assert "0.4002" in grid_c1
-    assert "0.8748" in grid_c1
-    # Must NOT contain Set B numbers in this C1 grid
-    assert "0.4296" not in grid_c1, "Grid 1 mistakenly mixed Set B PR-AUC into Set C1 grid"
-    assert "0.8705" not in grid_c1, "Grid 1 mistakenly mixed Set B ROC-AUC into Set C1 grid"
-
-    # Grid 2: Baseline Model (Set B)
-    grid_b = grids[2].split('</div>\n            </div>')[0]
+    # Grid 1: Deployed Model (Set B)
+    grid_b = grids[1].split('</div>\n            </div>')[0]
     assert "Set B Test PR-AUC" in grid_b
     assert "Set B Test ROC-AUC" in grid_b
     assert "0.4296" in grid_b
     assert "0.8705" in grid_b
     # Must NOT contain Set C1 PR-AUC in this Set B grid
-    assert "0.4002" not in grid_b, "Grid 2 mistakenly mixed Set C1 PR-AUC into Set B grid"
+    assert "0.4002" not in grid_b, "Grid 1 mistakenly mixed Set C1 PR-AUC into Set B grid"
+
+    # Grid 2: Comparison Model (Set C1)
+    grid_c1 = grids[2].split('</div>\n            </div>')[0]
+    assert "Set C1 Test PR-AUC" in grid_c1
+    assert "Set C1 Test ROC-AUC" in grid_c1
+    assert "0.4002" in grid_c1
+    assert "0.8748" in grid_c1
+    # Must NOT contain Set B numbers in this C1 grid
+    assert "0.4296" not in grid_c1, "Grid 2 mistakenly mixed Set B PR-AUC into Set C1 grid"
+    assert "0.8705" not in grid_c1, "Grid 2 mistakenly mixed Set B ROC-AUC into Set C1 grid"
+
+
+def test_headline_precision_recall_row_consistency():
+    """Assert mathematical consistency (frauds == round(precision * rows))
+    for all headline precision/recall figures mentioned in docs and reports."""
+    # 1. Headline Set B top 1.0% rank-based: 886 rows, 86.00% precision
+    rows_b_1 = 886
+    prec_b_1 = 0.860045
+    frauds_b_1 = round(rows_b_1 * prec_b_1)
+    assert frauds_b_1 == 762, f"Expected 762 frauds, got {frauds_b_1}"
+
+    # 2. Headline Set C1 top 1.0% rank-based: 886 rows, 72.69% precision
+    rows_c1_1 = 886
+    prec_c1_1 = 0.726862
+    frauds_c1_1 = round(rows_c1_1 * prec_c1_1)
+    assert frauds_c1_1 == 644, f"Expected 644 frauds, got {frauds_c1_1}"
+
+    # 3. Headline Set C1 threshold-based operating points on test (N=88,581, total_frauds=3083)
+    tier_checks = [
+        ("top_0.5pct", 515, 0.943689, 486, 0.157639),
+        ("top_1.0pct", 1742, 0.479334, 835, 0.270840),
+        ("top_2.0pct", 3503, 0.364830, 1278, 0.414531),
+        ("top_5.0pct", 6670, 0.268516, 1791, 0.580928),
+    ]
+    for tier, rows, prec, exp_frauds, rec in tier_checks:
+        calculated_frauds = round(rows * prec)
+        assert calculated_frauds == exp_frauds, (
+            f"Tier {tier} precision inconsistency: {rows} * {prec} = {calculated_frauds} != {exp_frauds}"
+        )
+        calculated_from_recall = round(3083 * rec)
+        assert calculated_from_recall == exp_frauds, (
+            f"Tier {tier} recall inconsistency: 3083 * {rec} = {calculated_from_recall} != {exp_frauds}"
+        )
+
+    # 4. Verify text occurrences in README, MODEL_CARD, and index.html do not claim 860 frauds
+    readme_text = Path("README.md").read_text(encoding="utf-8")
+    model_card_text = Path("docs/MODEL_CARD.md").read_text(encoding="utf-8")
+    html_text = Path("src/fraudshield/api/static/index.html").read_text(encoding="utf-8")
+    assert "860 true frauds" not in readme_text
+    assert "860 true frauds" not in model_card_text
+    assert "860 true frauds" not in html_text
+    assert "762" in readme_text
+    assert "762" in model_card_text
+    assert "762" in html_text
 

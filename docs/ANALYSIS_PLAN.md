@@ -49,6 +49,12 @@ To prevent false discovery and optimistic bias, an explicit two-criterion decisi
 > [!CAUTION]
 > If either criterion fails (i.e. the 95% CI spans zero OR any backtest fold exhibits a non-positive difference), the result will be reported plainly and transparently as **"no reliable gain"**. No post-hoc feature engineering, hyperparameter tuning, or threshold alterations will be permitted to force a positive outcome.
 
+### 2.1 Empirical Verdict & Sensitivity Result
+- **Primary Result**: **For the pipeline actually run (reg:squarederror, unintended), the pre-specified rule gives NO RELIABLE GAIN for C1 over B (val PR-AUC CI spans zero; test PR-AUC delta -0.029)**.
+- **Sensitivity Result**: **With binary:logistic, validation C1-B PR-AUC = +0.0079, CI [+0.0048, +0.0112] excludes zero, while Recall@1% delta = -0.0026, CI [-0.0060, +0.0003]. No logistic test result exists.**
+- **Decision Rule Dependence**: The pre-specified rule's outcome depends on the objective.
+- **Production Deployment Decision**: Baseline Model Set B is served by the production API because Set B achieved superior out-of-time test performance (PR-AUC 0.4296 vs. 0.4002). Set C1 did not beat Set B on test.
+
 ---
 
 ## 3. Sensitivity Analysis Specification
@@ -107,6 +113,9 @@ To answer the second core semester research question:
 - **Random Split**: A uniformly shuffled 70/15 partition ($82.35\% / 17.65\%$) of the same 501,959 rows using seed `42`.
 - **Model**: Identical XGBoost configuration trained on Set B features.
 - **Reporting**: PR-AUC, ROC-AUC, Recall@1.0%, 2.0%, 5.0%, and the generalization performance gap ($\text{Random} - \text{Temporal}$). The random split is explicitly documented as **optimistic and leaky**.
+- **Objective Generalization Gaps**:
+  - `reg:squarederror` (M5 Production Run): **+12.4 percentage points (0.646 vs. 0.522 PR-AUC, ~24% relative)** overstatement.
+  - `binary:logistic` (Sensitivity Benchmark): **+13.43 percentage points (0.6960 vs. 0.5617 PR-AUC)** overstatement.
 
 ---
 

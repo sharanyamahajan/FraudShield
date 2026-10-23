@@ -74,7 +74,7 @@
             <span class="badge">Production Risk Engine</span>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);">
-            Evaluated on Sealed Held-Out Test Split ($N=88,581$)
+            Serving Baseline Model Set B (Best Out-of-Time Test PR-AUC 0.4296) | Evaluated on Sealed Test Split ($N=88,581$)
         </div>
     </header>
 
@@ -91,58 +91,61 @@
         <!-- 1. EXECUTIVE OVERVIEW TAB -->
         <div id="tab-overview" class="tab-pane active">
             <div class="disclaimer-box">
-                <strong>Operational Review Philosophy:</strong> Under severe fraud prevalence ($\sim 3.5\%$), transactions are scored to prioritize finite analyst manual review capacity. Terminology strictly reflects review prioritization rather than definitive fraud claims. The API directly serves the <strong>Primary Model (Set C1)</strong> with uncalibrated scores and calibrated probabilities.
+                <strong>Operational Review Philosophy:</strong> Under severe fraud prevalence ($\sim 3.5\%$), transactions are scored to prioritize finite analyst manual review capacity. Terminology strictly reflects review prioritization rather than definitive fraud claims. The API directly serves <strong>Deployed Model Set B</strong> (Test PR-AUC = 0.4296) because it outperformed Set C1 on the held-out test split.
             </div>
 
-            <div style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-blue);">
-                Primary Model (Set C1 - Served by API) Out-of-Time Test Performance:
+            <div style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--accent-green);">
+                Deployed Production Model (Set B - Served by API) Out-of-Time Test Performance:
             </div>
             <div class="kpi-grid">
                 <div class="card">
-                    <div class="kpi-title">Set C1 Test PR-AUC</div>
-                    <div class="kpi-value" id="kpi-test-prauc">0.4002</div>
-                    <div class="kpi-sub">Primary Model Set C1</div>
+                    <div class="kpi-title">Set B Test PR-AUC</div>
+                    <div class="kpi-value" id="kpi-test-prauc" style="color: var(--accent-green);">0.4296</div>
+                    <div class="kpi-sub">Deployed Model Set B (Best Out-of-Time)</div>
                 </div>
                 <div class="card">
-                    <div class="kpi-title">Set C1 Test ROC-AUC</div>
-                    <div class="kpi-value" id="kpi-test-rocauc">0.8748</div>
-                    <div class="kpi-sub">Primary Model Set C1</div>
+                    <div class="kpi-title">Set B Test ROC-AUC</div>
+                    <div class="kpi-value" id="kpi-test-rocauc">0.8705</div>
+                    <div class="kpi-sub">Deployed Model Set B Discrimination</div>
                 </div>
                 <div class="card">
-                    <div class="kpi-title">Set C1 Top 1% Precision</div>
-                    <div class="kpi-value" style="color: var(--accent-green);">72.7%</div>
-                    <div class="kpi-sub">Rank-based: 644 frauds in 886 alerts (Fixed &theta;: 47.9%, 1,742 alerts)</div>
+                    <div class="kpi-title">Set B Top 1% Precision</div>
+                    <div class="kpi-value" style="color: var(--accent-green);">86.0%</div>
+                    <div class="kpi-sub">Rank-based: ~762 true frauds in 886 alerts (86.0% precision)</div>
                 </div>
                 <div class="card">
                     <div class="kpi-title">Held-Out Test Brier Score</div>
-                    <div class="kpi-value" style="color: var(--accent-amber); font-size: 1.45rem;">0.0290 &rarr; 0.0319</div>
-                    <div class="kpi-sub">Calibration worsened test Brier under drift (Uncal: 0.0290, Cal: 0.0319)</div>
+                    <div class="kpi-value" style="color: var(--accent-blue);">0.0268</div>
+                    <div class="kpi-sub">Uncalibrated baseline out-of-time (Val calibrated: 0.0219)</div>
                 </div>
             </div>
 
-            <div style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
-                Baseline Comparison Model (Set B) Out-of-Time Test Performance:
+            <div style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
+                Comparison Model (Set C1 - Entity History):
+            </div>
+            <div class="disclaimer-box" style="margin-bottom: 0.75rem; border-left: 3px solid var(--accent-amber); background: rgba(245, 158, 11, 0.08);">
+                <strong>Prominent Note:</strong> Model Set C1 (card1 Entity History) did NOT beat Baseline Model Set B on the held-out test split (PR-AUC 0.4002 vs. 0.4296, &Delta; = -0.0294). Baseline Model Set B is therefore the active model served by the production API.
             </div>
             <div class="kpi-grid" style="margin-bottom: 2rem;">
                 <div class="card" style="background: rgba(0,0,0,0.2);">
-                    <div class="kpi-title">Set B Test PR-AUC</div>
-                    <div class="kpi-value">0.4296</div>
-                    <div class="kpi-sub">Baseline Model Set B</div>
+                    <div class="kpi-title">Set C1 Test PR-AUC</div>
+                    <div class="kpi-value" style="color: var(--accent-amber);">0.4002</div>
+                    <div class="kpi-sub">Did not beat Set B on test (&Delta; = -0.0294)</div>
                 </div>
                 <div class="card" style="background: rgba(0,0,0,0.2);">
-                    <div class="kpi-title">Set B Test ROC-AUC</div>
-                    <div class="kpi-value">0.8705</div>
-                    <div class="kpi-sub">Baseline Model Set B</div>
+                    <div class="kpi-title">Set C1 Test ROC-AUC</div>
+                    <div class="kpi-value">0.8748</div>
+                    <div class="kpi-sub">Comparison Model Set C1</div>
                 </div>
                 <div class="card" style="background: rgba(0,0,0,0.2);">
-                    <div class="kpi-title">Set B Top 1% Precision</div>
-                    <div class="kpi-value" style="color: var(--accent-green);">86.0%</div>
-                    <div class="kpi-sub">Rank-based: 860 true frauds per 1,000 alerts</div>
+                    <div class="kpi-title">Set C1 Top 1% Precision</div>
+                    <div class="kpi-value">72.7%</div>
+                    <div class="kpi-sub">Rank-based: 644 frauds in 886 alerts (Fixed &theta;: 47.9%, 1,742 alerts)</div>
                 </div>
                 <div class="card" style="background: rgba(0,0,0,0.2);">
-                    <div class="kpi-title">Set B Test Brier Score</div>
-                    <div class="kpi-value">0.0268</div>
-                    <div class="kpi-sub">Uncalibrated baseline out-of-time</div>
+                    <div class="kpi-title">Set C1 Test Brier Score</div>
+                    <div class="kpi-value" style="font-size: 1.45rem;">0.0290 &rarr; 0.0319</div>
+                    <div class="kpi-sub">Calibration worsened test Brier under drift (Uncal: 0.0290, Cal: 0.0319)</div>
                 </div>
             </div>
 
@@ -209,13 +212,18 @@
         <!-- 2. MODEL COMPARISON & RQ2 TAB -->
         <div id="tab-comparison" class="tab-pane">
             <div class="disclaimer-box">
-                <strong>Empirical Scientific Finding (RQ1 & RQ2):</strong> Set C1 (backward-looking entity history) did not produce reliable gains over Set B under strict temporal evaluation. Furthermore, random split cross-validation overstates PR-AUC by <strong>+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)</strong> due to temporal lookahead leakage, which shows (single dataset) the necessity of chronological validation.
+                <strong>Empirical Scientific Findings (RQ1 & RQ2):</strong>
+                <ul style="margin: 0.5rem 0 0 1.25rem; line-height: 1.5;">
+                    <li><strong>Primary Result (RQ1)</strong>: For the pipeline actually run (reg:squarederror, unintended), the pre-specified rule gives NO RELIABLE GAIN for C1 over B (val PR-AUC CI spans zero; test PR-AUC delta -0.029).</li>
+                    <li><strong>Sensitivity Result</strong>: With binary:logistic, validation C1-B PR-AUC = +0.0079, CI [+0.0048, +0.0112] excludes zero, while Recall@1% delta = -0.0026, CI [-0.0060, +0.0003]. No logistic test result exists. The pre-specified rule's outcome depends on the objective.</li>
+                    <li><strong>RQ2 Generalization Gap</strong>: Random cross-validation overstates PR-AUC by <strong>+12.4 percentage points (0.646 vs 0.522 PR-AUC, ~24% relative)</strong> under squared-error, and by <strong>+13.43 percentage points (0.6960 vs 0.5617 PR-AUC)</strong> under binary:logistic, showing (single dataset) the danger of non-temporal evaluation.</li>
+                </ul>
             </div>
 
             <div class="grid-2">
                 <div class="card">
                     <h3 style="font-size: 1rem; font-weight: 600;">RQ2: Random vs. Temporal Split Generalization Gap</h3>
-                    <p style="font-size: 0.775rem; color: var(--text-secondary);">Quantifying optimistic leakage from random splitting on the identical 501,959 training rows.</p>
+                    <p style="font-size: 0.775rem; color: var(--text-secondary);">Chart shows the reg:squarederror M5 production run (+12.4 pp gap: 0.646 vs 0.522 PR-AUC). Under binary:logistic sensitivity, the gap is +13.43 pp (0.6960 vs 0.5617 PR-AUC).</p>
                     <div class="chart-box">
                         <canvas id="rq2Chart"></canvas>
                     </div>
@@ -451,12 +459,12 @@
                     labels: ['PR-AUC', 'Recall @ 1%', 'Recall @ 2%', 'Recall @ 5%'],
                     datasets: [
                         {
-                            label: 'Temporal Split (Leakage-Safe)',
+                            label: 'Temporal Split (reg:squarederror, Leakage-Safe)',
                             data: [52.22, 26.40, 40.43, 56.02],
                             backgroundColor: '#38bdf8'
                         },
                         {
-                            label: 'Random Split (Optimistic / Leaky)',
+                            label: 'Random Split (reg:squarederror, Optimistic / Leaky)',
                             data: [64.63, 27.47, 48.31, 65.33],
                             backgroundColor: '#f87171'
                         }
