@@ -153,3 +153,31 @@ def test_headline_precision_recall_row_consistency():
     assert "762" in model_card_text
     assert "762" in html_text
 
+
+def test_model_b_test_brier_matches_script_output():
+    """Verify that Model B test Brier values in reports match the output of scripts/evaluate_model_b_calibration.py."""
+    import sys
+    sys.path.insert(0, str(Path(".").resolve()))
+    from scripts.evaluate_model_b_calibration import compute_model_b_test_brier
+
+    reports_dir = Path("reports")
+    models_dir = Path("models")
+
+    if not (reports_dir / "test_probs_b.npy").exists() or not (reports_dir / "fraudshield.db").exists():
+        pytest.skip("Test scores or database not found - run pipeline first")
+
+    script_raw_brier, script_cal_brier = compute_model_b_test_brier(reports_dir, models_dir)
+
+    # Compare with test_evaluation_summary.json
+    with open(reports_dir / "test_evaluation_summary.json", "r", encoding="utf-8") as f:
+        summary_json = json.load(f)
+    json_b = summary_json["baseline_model_set_b"]
+    assert pytest.approx(json_b["test_brier_uncalibrated"], rel=1e-5) == script_raw_brier
+    assert pytest.approx(json_b["test_brier_calibrated"], rel=1e-5) == script_cal_brier
+
+    # Compare with test_evaluation_summary.csv
+    df_csv = pd.read_csv(reports_dir / "test_evaluation_summary.csv")
+    csv_b = df_csv[df_csv["model"].str.contains("Set B")].iloc[0]
+    assert pytest.approx(float(csv_b["brier_uncalibrated"]), rel=1e-5) == script_raw_brier
+    assert pytest.approx(float(csv_b["brier_calibrated"]), rel=1e-5) == script_cal_brier
+

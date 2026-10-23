@@ -74,13 +74,17 @@ pytest -q
 
 ### 3. Pipeline Run Order (From Scratch)
 1. **Raw Data Ingestion**: Place Kaggle `train_transaction.csv` and `train_identity.csv` into `data/raw/`.
-2. **Data Pipeline & Audit**: `python scripts/ingest_data.py`
-3. **Chronological Splits & Feature Sets A/B**: `python scripts/build_features.py`
-4. **Backward-Looking Entity History (Sets C1/C2)**: `python scripts/build_set_c.py`
-5. **Leakage-Safe Statistical Evaluation & Backtest**: `python scripts/run_milestone5.py`
-6. **Probability Calibration & Authorized Test Evaluation**: `python scripts/evaluate_test.py`
+2. **Data Pipeline & Audit (Milestone 1)**: `python -m fraudshield data`
+3. **Chronological Splits & Feature Sets A/B (Milestone 2)**: `python -m fraudshield features`
+4. **Backward-Looking Entity History (Milestone 4)**: `python scripts/build_set_c.py`
+5. **Leakage-Safe Statistical Evaluation & Backtest (Milestone 5)**: `python scripts/run_milestone5.py`
+6. **Probability Calibration & Authorized Test Evaluation (Milestone 6)**: `python scripts/evaluate_test.py`
 7. **Model B Production Serving Setup**: `python scripts/prepare_model_b_serving.py`
-8. **Launch REST API & Dashboard**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
+8. **Model B Post-Hoc Test Calibration Audit**: `python scripts/evaluate_model_b_calibration.py`
+9. **Launch REST API & Dashboard**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
+
+> [!NOTE]
+> **Git Tag History (`v1.0-final`)**: The release tag `v1.0-final` was re-pointed once after cleanup. It was originally created at commit `abb677c` after implementing graceful API test skips and pinned dependencies, and subsequently re-pointed to include exact 6-decimal Brier scores for both Model B and Set C1 in `docs/MODEL_CARD.md` and the dedicated evaluation script `scripts/evaluate_model_b_calibration.py`.
 
 ---
 
