@@ -186,7 +186,7 @@ def generate_markdown_report(data: Dict[str, Any], output_path: Path) -> None:
         f"- **Strict Monotonicity**: `{ts['is_strictly_monotonic']}`",
         f"- **Weak Monotonicity (Non-Decreasing)**: `{ts['is_weakly_monotonic']}`",
         f"- **Unique Timestamps**: {ts['unique_timestamps']:,}",
-        f"- **Timestamp Ties (Duplicate Seconds)**: {ts['timestamp_tie_rows']:,} rows ({ts['tie_rate']*100:.2f}%) share a `TransactionDT` with at least one other transaction.",
+        f"- **Timestamp Ties (Duplicate Seconds)**: {ts.get('tied_rows', ts.get('timestamp_tie_rows', 0)):,} rows ({ts.get('tied_rows_pct', ts.get('tie_rate', 0.0) * 100 if 'tie_rate' in ts else 0.0):.2f}%) share a `TransactionDT` with at least one other transaction.",
         f"- **Maximum Concurrent Transactions in a Single Second**: {ts['max_ties_in_single_second']:,}",
         "",
         "### Tie-Breaking and Strict-Inequality Rule",
