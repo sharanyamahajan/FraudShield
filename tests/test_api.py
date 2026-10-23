@@ -1,8 +1,13 @@
 """Test suite for the FraudShield FastAPI application."""
 
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from fraudshield.api.main import app
+
+DB_PATH = Path("reports/fraudshield.db")
+MODEL_PATH = Path("models/xgb_set_b.json")
+PREP_PATH = Path("models/preprocessor_b.pkl")
 
 
 @pytest.fixture(scope="module")
@@ -24,6 +29,8 @@ def test_health_endpoints(client):
 
 
 def test_metadata_endpoint(client):
+    if not DB_PATH.exists():
+        pytest.skip("reports/fraudshield.db not found (fresh clone without database) - run pipeline first")
     r = client.get("/api/metadata")
     assert r.status_code == 200
     data = r.json()
@@ -34,6 +41,8 @@ def test_metadata_endpoint(client):
 
 
 def test_operating_points_endpoint(client):
+    if not DB_PATH.exists():
+        pytest.skip("reports/fraudshield.db not found (fresh clone without database) - run pipeline first")
     r = client.get("/api/operating-points")
     assert r.status_code == 200
     data = r.json()
@@ -47,6 +56,8 @@ def test_operating_points_endpoint(client):
 
 
 def test_features_importance_endpoint(client):
+    if not DB_PATH.exists():
+        pytest.skip("reports/fraudshield.db not found (fresh clone without database) - run pipeline first")
     r = client.get("/api/features/importance?limit=10")
     assert r.status_code == 200
     data = r.json()
@@ -57,6 +68,8 @@ def test_features_importance_endpoint(client):
 
 
 def test_transactions_pagination_and_filter(client):
+    if not DB_PATH.exists():
+        pytest.skip("reports/fraudshield.db not found (fresh clone without database) - run pipeline first")
     # 1. Default pagination
     r = client.get("/api/transactions?limit=10&offset=0")
     assert r.status_code == 200
@@ -74,6 +87,8 @@ def test_transactions_pagination_and_filter(client):
 
 
 def test_transaction_detail_and_not_found(client):
+    if not DB_PATH.exists():
+        pytest.skip("reports/fraudshield.db not found (fresh clone without database) - run pipeline first")
     # Get first transaction ID
     r_list = client.get("/api/transactions?limit=1")
     tx_id = r_list.json()["transactions"][0]["transaction_id"]
@@ -91,6 +106,8 @@ def test_transaction_detail_and_not_found(client):
 
 
 def test_score_endpoint(client):
+    if not MODEL_PATH.exists() or not PREP_PATH.exists():
+        pytest.skip("Model or preprocessor artifact not found in models/ - run pipeline first")
     # Construct a minimal feature payload using default features
     payload = {
         "features": {
@@ -118,6 +135,8 @@ def test_score_endpoint(client):
 
 
 def test_score_endpoint_missing_fields(client):
+    if not MODEL_PATH.exists() or not PREP_PATH.exists():
+        pytest.skip("Model or preprocessor artifact not found in models/ - run pipeline first")
     # Payload with almost all columns missing (only TransactionAmt and card1 provided)
     payload = {
         "features": {
@@ -134,6 +153,8 @@ def test_score_endpoint_missing_fields(client):
 
 
 def test_score_endpoint_unseen_categories(client):
+    if not MODEL_PATH.exists() or not PREP_PATH.exists():
+        pytest.skip("Model or preprocessor artifact not found in models/ - run pipeline first")
     # Payload with novel/unseen categorical values
     payload = {
         "features": {

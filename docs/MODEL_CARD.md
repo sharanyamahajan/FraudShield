@@ -45,7 +45,7 @@ Following the Model Cards for Model Reporting framework (Mitchell et al., 2019).
 ### Out-of-Time Test Performance ($N=88,581$):
 - **Test PR-AUC**: `0.429595` (Deployed Baseline Set B) vs `0.400179` (Set C1).
 - **Test ROC-AUC**: `0.870473` (Set B) vs `0.874754` (Set C1).
-- **Test Brier Score**: `0.026810` (Set B baseline out-of-time). For Set C1, test Brier shifted from 0.029021 (uncalibrated) to 0.031882 (calibrated with Isotonic regression fit on validation); calibration worsened test Brier under drift (effect is small: +0.00286).
+- **Test Brier Score (Deployed Model B)**: `0.026810` (uncalibrated) vs `0.029408` (calibrated with Isotonic regression fit on validation); labeled **"post-hoc, test split already seen"**. Calibration slightly worsened test Brier (+0.0026) due to temporal drift, consistent with Set C1 behavior (`0.0290` -> `0.0319`).
 - **Served Model**: The production API serves **Baseline Model Set B** because B beat C1 on the held-out test split (PR-AUC 0.4296 vs. 0.4002). Model C1 did not beat Model B on test.
 - **Top 0.5% Capacity Tier**: Validation Cutoff $\ge 0.8684$ $\rightarrow$ flags 515 transactions (~0.58% of test), capturing 486 frauds with 94.37% Precision, 15.76% Fraud Capture Rate (FPR = 0.03%).
 - **Top 1.0% Capacity Tier**: Validation Cutoff $\ge 0.6139$ $\rightarrow$ flags 1,742 transactions (~1.97% of test), capturing 835 frauds with 47.93% Precision, 27.08% Fraud Capture Rate (FPR = 1.06%).

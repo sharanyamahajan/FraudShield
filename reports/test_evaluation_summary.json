@@ -27,7 +27,10 @@
   "baseline_model_set_b": {
     "test_pr_auc": 0.429595,
     "test_roc_auc": 0.870473,
-    "best_iteration": 293
+    "best_iteration": 293,
+    "test_brier_uncalibrated": 0.026810461655259132,
+    "test_brier_calibrated": 0.029408035799860954,
+    "calibration_evaluation_note": "post-hoc, test split already seen"
   },
   "test_paired_bootstrap_c1_minus_b": {
     "pr_auc": {

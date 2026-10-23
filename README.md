@@ -1,6 +1,6 @@
 # FraudShield: Leakage-Safe Transaction Fraud Risk Engine
 
-[![Test Suite](https://img.shields.io/badge/pytest-45%20passed-brightgreen.svg)](tests/)
+[![Test Suite](https://img.shields.io/badge/pytest-53%20passed-brightgreen.svg)](tests/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-blue.svg)](src/fraudshield/api/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -53,8 +53,34 @@ FraudShield/
 │   ├── splits/              # Strict chronological splitter & security guard
 │   ├── evaluation/          # PR-AUC, ROC-AUC, review budget metrics engine
 │   └── models/              # Model training, convergence & baselines
-└── tests/                   # 45 passing unit, integration, and guard tests
+└── tests/                   # 53 passing unit, integration, and guard tests
 ```
+
+---
+
+## 🛠️ Step-by-Step Installation & Pipeline Reproduction
+
+### 1. Environment Installation
+```powershell
+pip install -r requirements.txt
+pip install -e .
+```
+
+### 2. Verify the Test Suite
+```powershell
+pytest -q
+```
+*(On a clean clone before pipeline execution, 44 unit and audit tests pass and 9 database/model dependent tests skip cleanly).*
+
+### 3. Pipeline Run Order (From Scratch)
+1. **Raw Data Ingestion**: Place Kaggle `train_transaction.csv` and `train_identity.csv` into `data/raw/`.
+2. **Data Pipeline & Audit**: `python scripts/ingest_data.py`
+3. **Chronological Splits & Feature Sets A/B**: `python scripts/build_features.py`
+4. **Backward-Looking Entity History (Sets C1/C2)**: `python scripts/build_set_c.py`
+5. **Leakage-Safe Statistical Evaluation & Backtest**: `python scripts/run_milestone5.py`
+6. **Probability Calibration & Authorized Test Evaluation**: `python scripts/evaluate_test.py`
+7. **Model B Production Serving Setup**: `python scripts/prepare_model_b_serving.py`
+8. **Launch REST API & Dashboard**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
 
 ---
 

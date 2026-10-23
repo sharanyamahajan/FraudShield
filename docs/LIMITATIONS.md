@@ -56,6 +56,7 @@ This document details critical real-world limitations, failure modes, and deploy
   - *RQ2 Gap with Logistic vs Squared-Error*: Random split overstates PR-AUC by **+12.4 pp** under squared-error (`0.646` vs. `0.522`), and by **+13.43 pp** under logistic (`0.6960` vs. `0.5617`).
 - **Deployed Model & Production Serving**:
   - The downstream production API, SHAP explainability, and calibration serve **Baseline Model Set B** (`models/xgb_set_b.json`), because Set B achieved superior out-of-time test performance (PR-AUC 0.4296 vs. 0.4002). Model Set C1 did not beat Model Set B on test.
+  - **Post-Hoc Model B Test Calibration**: On the held-out test split, served Model B achieved an uncalibrated Brier score of `0.026810` and an isotonic-calibrated Brier score of `0.029408` (calibrator fit on validation only). This metric is explicitly labeled **"post-hoc, test split already seen"**, as Model B was selected for deployment following comparative test evaluation. Consistent with Set C1 (`0.0290` $\rightarrow$ `0.0319`), calibration slightly widened test Brier error (+0.0026) under temporal drift.
   - In both `scripts/evaluate_test.py` and `src/fraudshield/api/main.py`, raw scores are explicitly clipped to $[0, 1]$ (`np.clip(score, 1e-6, 1.0 - 1e-6)`) before calibration and evaluation.
 
 ### 6.2 Execution Script Commit Audit & Test Split Sealing
