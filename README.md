@@ -72,19 +72,28 @@ pytest -q
 ```
 *(On a clean clone before pipeline execution, 44 unit and audit tests pass and 9 database/model dependent tests skip cleanly).*
 
-### 3. Pipeline Run Order (From Scratch)
-1. **Raw Data Ingestion**: Place Kaggle `train_transaction.csv` and `train_identity.csv` into `data/raw/`.
-2. **Data Pipeline & Audit (Milestone 1)**: `python -m fraudshield data`
-3. **Chronological Splits & Feature Sets A/B (Milestone 2)**: `python -m fraudshield features`
-4. **Backward-Looking Entity History (Milestone 4)**: `python scripts/build_set_c.py`
-5. **Leakage-Safe Statistical Evaluation & Backtest (Milestone 5)**: `python scripts/run_milestone5.py`
-6. **Probability Calibration & Authorized Test Evaluation (Milestone 6)**: `python scripts/evaluate_test.py`
-7. **Model B Production Serving Setup**: `python scripts/prepare_model_b_serving.py`
-8. **Model B Post-Hoc Test Calibration Audit**: `python scripts/evaluate_model_b_calibration.py`
-9. **Launch REST API & Dashboard**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
+### 3. Pipeline Reproduction & Execution Workflow
+
+- **Steps 1–4 (Reproducible from Raw Data)**: Full data ingestion, verification, chronological train/val/test splitting, baseline feature engineering, and backward-looking entity history feature generation can be executed directly from raw Kaggle CSVs:
+  1. **Raw Data Ingestion**: Place Kaggle `train_transaction.csv` and `train_identity.csv` into `data/raw/`.
+  2. **Data Pipeline & Audit (Milestone 1)**: `python -m fraudshield data`
+  3. **Chronological Splits & Feature Sets A/B (Milestone 2)**: `python -m fraudshield features`
+  4. **Backward-Looking Entity History (Milestone 4)**: `python scripts/build_set_c.py`
+
+- **Steps 5–8 (Require Saved Artifacts & Checkpoints)**:
+  - **Step 5 (Milestone 5 Statistical Evaluation)**: `python scripts/run_milestone5.py` uses checkpointed fits in `reports/m5_checkpoints/` (`b_s42`, `c1_s42`, `c2_s42`, `rq2_rnd_b`, `bt_f1_b`, `bt_f1_c1`). Full fitting from scratch was stopped and reduced in scope to adhere to runtime budget constraints (dropping secondary multi-seed fits).
+  - **Step 6 (Milestone 6 Test Evaluation)**: `scripts/evaluate_test.py` was **intentionally not rerun** during subsequent audits to keep the held-out test split strictly sealed and prevent repeated data snooping.
+  - **Step 7 (Model B Serving Preparation)**: `python scripts/prepare_model_b_serving.py` operates on pre-saved Model B booster (`models/xgb_set_b.json`) and validation split to fit the served calibrator (`models/calibrator_b.pkl`) and SQLite metadata.
+  - **Step 8 (Model B & C1 Calibration & Alignment Audit)**: `python scripts/evaluate_model_b_calibration.py` audits row-for-row alignment and evaluates calibration strictly from saved predictions (`reports/test_probs_b.npy` and `reports/fraudshield.db`) without reading raw test parquet.
+  - **Step 9 (Launch REST API & Dashboard)**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
 
 > [!NOTE]
-> **Git Tag History (`v1.0-final`)**: The release tag `v1.0-final` was re-pointed once after cleanup. It was originally created at commit `abb677c` after implementing graceful API test skips and pinned dependencies, and subsequently re-pointed to include exact 6-decimal Brier scores for both Model B and Set C1 in `docs/MODEL_CARD.md`, the dedicated evaluation script `scripts/evaluate_model_b_calibration.py`, and the verify.py data pipeline tie-handling fix.
+> **Git Tag History (`v1.0-final`)**: The release tag `v1.0-final` was re-pointed several times during final auditing and cleanup:
+> - `abb677c`: Initial `v1.0-final` tag after implementing graceful API test skips, pinned `requirements.txt`, and post-hoc Model B test calibration.
+> - `2209277`: Re-pointed to incorporate exact 6-decimal test Brier scores in `docs/MODEL_CARD.md`.
+> - `2fe0246`: Re-pointed after committing `scripts/evaluate_model_b_calibration.py`, backup archive script, and audit test suite.
+> - `7fe3c55`: Re-pointed after fixing `src/fraudshield/data/verify.py` key lookup for duplicate second ties in data verification.
+> - `8ab9c8c` and successor: Re-pointed to document multi-stage tag history, restore `models/calibrator_c1.pkl`, add TransactionID alignment validation, clarify reproduction boundaries, and complete full backup.
 
 ---
 

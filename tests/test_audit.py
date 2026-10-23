@@ -181,3 +181,36 @@ def test_model_b_test_brier_matches_script_output():
     assert pytest.approx(float(csv_b["brier_uncalibrated"]), rel=1e-5) == script_raw_brier
     assert pytest.approx(float(csv_b["brier_calibrated"]), rel=1e-5) == script_cal_brier
 
+
+def test_test_prediction_alignment_and_c1_brier_reproducibility():
+    """Verify that test predictions strictly align with SQLite labels and C1 Brier is script-reproducible."""
+    import sys
+    sys.path.insert(0, str(Path(".").resolve()))
+    from scripts.evaluate_model_b_calibration import check_test_alignment, compute_model_c1_test_brier
+
+    reports_dir = Path("reports")
+    models_dir = Path("models")
+
+    if not (reports_dir / "test_probs_b.npy").exists() or not (reports_dir / "fraudshield.db").exists():
+        pytest.skip("Test scores or database not found - run pipeline first")
+
+    # 1. Test alignment check
+    alignment = check_test_alignment(reports_dir)
+    assert alignment["aligned"] is True
+    assert alignment["row_count"] == 88581
+    assert alignment["is_dt_monotonic"] is True
+    assert alignment["tid_hash"] == "2cdc1792935bf23f2a14ec831f93335bda9c5e0127ebe277eb54c13d5689a6dc"
+    assert pytest.approx(alignment["prauc"], rel=1e-4) == 0.429595
+    assert pytest.approx(alignment["rocauc"], rel=1e-4) == 0.870473
+
+    # 2. Test Set C1 calibration reproducibility via models/calibrator_c1.pkl
+    if (models_dir / "calibrator_c1.pkl").exists():
+        c1_raw_brier, c1_cal_brier = compute_model_c1_test_brier(reports_dir, models_dir)
+        with open(reports_dir / "test_evaluation_summary.json", "r", encoding="utf-8") as f:
+            summary = json.load(f)
+        c1_meta = summary["calibrator"]
+        assert pytest.approx(c1_meta["test_brier_uncalibrated"], rel=1e-4) == c1_raw_brier
+        assert pytest.approx(c1_meta["test_brier_calibrated"], rel=1e-4) == c1_cal_brier
+        assert round(c1_cal_brier, 4) == 0.0319
+
+

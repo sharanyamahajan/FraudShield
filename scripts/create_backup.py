@@ -1,4 +1,4 @@
-"""Create backup zip of models/ and data/processed/ outside the repository."""
+"""Create backup zip of models/, data/processed/, reports/, and data/raw/ outside the repository."""
 import hashlib
 import os
 import zipfile
@@ -14,7 +14,7 @@ def main():
 
     print(f"Creating backup archive at: {out_zip}")
     with zipfile.ZipFile(out_zip, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for folder in ["models", "data/processed"]:
+        for folder in ["models", "data/processed", "reports", "data/raw"]:
             for dirpath, _, filenames in os.walk(folder):
                 for filename in filenames:
                     p = Path(dirpath) / filename
