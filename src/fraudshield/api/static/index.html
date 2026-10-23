@@ -79,12 +79,12 @@
     </header>
 
     <nav class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab('overview')">Executive Overview</button>
-        <button class="nav-btn" onclick="switchTab('comparison')">Model Comparison & RQ2 Leakage</button>
-        <button class="nav-btn" onclick="switchTab('operating')">Operating Point Explorer</button>
-        <button class="nav-btn" onclick="switchTab('transactions')">Transaction Risk Explorer</button>
-        <button class="nav-btn" onclick="switchTab('explainability')">Feature Explainability (SHAP)</button>
-        <button class="nav-btn" onclick="switchTab('methodology')">Methodology & Audit</button>
+        <button class="nav-btn active" onclick="switchTab('overview', this)">Executive Overview</button>
+        <button class="nav-btn" onclick="switchTab('comparison', this)">Model Comparison & RQ2 Leakage</button>
+        <button class="nav-btn" onclick="switchTab('operating', this)">Operating Point Explorer</button>
+        <button class="nav-btn" onclick="switchTab('transactions', this)">Transaction Risk Explorer</button>
+        <button class="nav-btn" onclick="switchTab('explainability', this)">Feature Explainability (SHAP)</button>
+        <button class="nav-btn" onclick="switchTab('methodology', this)">Methodology & Audit</button>
     </nav>
 
     <main>
@@ -313,9 +313,9 @@
         <div id="tab-transactions" class="tab-pane">
             <div class="card">
                 <div class="controls-bar" style="justify-content: space-between;">
-                    <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <input type="text" id="tx-search" placeholder="Search Transaction ID..." style="width: 200px;">
-                        <select id="tx-tier-filter" onchange="loadTransactions()">
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="tx-search" placeholder="Search Transaction ID..." style="width: 200px;" oninput="onSearchInput()">
+                        <select id="tx-tier-filter" onchange="currentOffset = 0; loadTransactions()">
                             <option value="">All Scored Records</option>
                             <option value="top_0.5pct">Top 0.5% Priority Alerts</option>
                             <option value="top_1.0pct" selected>Top 1.0% High Risk Alerts</option>
@@ -401,26 +401,54 @@
     <script>
         let currentOffset = 0;
         const limit = 20;
+        let overviewChartInstance = null;
+        let rq2ChartInstance = null;
+        let shapChartInstance = null;
+        let searchTimeout = null;
 
-        function switchTab(tabId) {
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            event.target.classList.add('active');
+            document.querySelectorAll('.nav-tabs .nav-btn').forEach(el => el.classList.remove('active'));
+            const targetPane = document.getElementById('tab-' + tabId);
+            if (targetPane) targetPane.classList.add('active');
 
-            if (tabId === 'transactions') loadTransactions();
-            if (tabId === 'explainability') loadShapChart();
-            if (tabId === 'comparison') loadRq2Chart();
+            if (btn && btn.classList) {
+                btn.classList.add('active');
+            } else {
+                const foundBtn = Array.from(document.querySelectorAll('.nav-tabs .nav-btn')).find(b => {
+                    const attr = b.getAttribute('onclick') || '';
+                    return attr.includes(`'${tabId}'`) || attr.includes(`"${tabId}"`);
+                });
+                if (foundBtn) foundBtn.classList.add('active');
+            }
+
+            try {
+                if (tabId === 'transactions') {
+                    loadTransactions();
+                } else if (tabId === 'explainability') {
+                    loadShapChart();
+                } else if (tabId === 'comparison') {
+                    loadRq2Chart();
+                } else if (tabId === 'overview') {
+                    if (overviewChartInstance) overviewChartInstance.resize();
+                }
+            } catch (err) {
+                console.error("Tab switch error:", err);
+            }
         }
 
-        // Initialize Charts on Load
+        // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             initOverviewChart();
+            loadTransactions();
         });
 
         function initOverviewChart() {
-            const ctx = document.getElementById('overviewBudgetChart').getContext('2d');
-            new Chart(ctx, {
+            const canvas = document.getElementById('overviewBudgetChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (overviewChartInstance) overviewChartInstance.destroy();
+            overviewChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Top 0.5% (515 rows, ~0.58%)', 'Top 1.0% (1,742 rows, ~1.97%)', 'Top 2.0% (3,503 rows, ~3.95%)', 'Top 5.0% (6,670 rows, ~7.53%)'],
@@ -449,11 +477,15 @@
             });
         }
 
-        let rq2ChartLoaded = false;
         function loadRq2Chart() {
-            if (rq2ChartLoaded) return;
-            const ctx = document.getElementById('rq2Chart').getContext('2d');
-            new Chart(ctx, {
+            if (rq2ChartInstance) {
+                rq2ChartInstance.resize();
+                return;
+            }
+            const canvas = document.getElementById('rq2Chart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            rq2ChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['PR-AUC', 'Recall @ 1%', 'Recall @ 2%', 'Recall @ 5%'],
@@ -480,17 +512,24 @@
                     plugins: { legend: { labels: { color: '#94a3b8' } } }
                 }
             });
-            rq2ChartLoaded = true;
         }
 
-        let shapChartLoaded = false;
         function loadShapChart() {
-            if (shapChartLoaded) return;
+            if (shapChartInstance) {
+                shapChartInstance.resize();
+                return;
+            }
             fetch('/api/features/importance?limit=15')
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(data => {
-                    const ctx = document.getElementById('shapGlobalChart').getContext('2d');
-                    new Chart(ctx, {
+                    const canvas = document.getElementById('shapGlobalChart');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    if (shapChartInstance) shapChartInstance.destroy();
+                    shapChartInstance = new Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: data.map(d => d.feature_name),
@@ -513,7 +552,13 @@
                             plugins: { legend: { display: false } }
                         }
                     });
-                    shapChartLoaded = true;
+                })
+                .catch(err => {
+                    console.error("SHAP chart error:", err);
+                    const container = document.getElementById('shapGlobalChart')?.parentElement;
+                    if (container) {
+                        container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);flex-direction:column;gap:0.75rem;"><p>Unable to load SHAP importance: ${err.message}</p><button class="btn-primary" style="padding:0.4rem 0.8rem;" onclick="loadShapChart()">Retry</button></div>`;
+                    }
                 });
         }
 
@@ -525,6 +570,7 @@
                 'top_5.0pct': { thresh: '0.1154', vol: '6,670', recall: '58.09%', captured: '1,791 frauds caught', prec: '26.85%' }
             };
             const d = data[tier];
+            if (!d) return;
             document.getElementById('sim-thresh').innerText = d.thresh;
             document.getElementById('sim-vol').innerText = d.vol;
             document.getElementById('sim-recall').innerText = d.recall;
@@ -532,18 +578,44 @@
             document.getElementById('sim-prec').innerText = d.prec;
         }
 
+        function onSearchInput() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentOffset = 0;
+                loadTransactions();
+            }, 300);
+        }
+
         function loadTransactions() {
-            const tier = document.getElementById('tx-tier-filter').value;
-            const isFraud = document.getElementById('tx-fraud-filter').value;
+            const tierEl = document.getElementById('tx-tier-filter');
+            const fraudEl = document.getElementById('tx-fraud-filter');
+            const searchEl = document.getElementById('tx-search');
+            const tbody = document.getElementById('tx-table-body');
+            const pageIndicator = document.getElementById('page-indicator');
+
+            const tier = tierEl ? tierEl.value : '';
+            const isFraud = fraudEl ? fraudEl.value : '';
+            const searchVal = searchEl ? searchEl.value.trim() : '';
+
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Fetching test records from SQLite...</td></tr>';
+
             let url = `/api/transactions?limit=${limit}&offset=${currentOffset}`;
-            if (tier) url += `&tier=${tier}`;
-            if (isFraud) url += `&is_fraud=${isFraud}`;
+            if (tier) url += `&tier=${encodeURIComponent(tier)}`;
+            if (isFraud) url += `&is_fraud=${encodeURIComponent(isFraud)}`;
+            if (searchVal) url += `&transaction_id=${encodeURIComponent(searchVal)}`;
 
             fetch(url)
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    return r.json();
+                })
                 .then(data => {
-                    const tbody = document.getElementById('tx-table-body');
                     tbody.innerHTML = '';
+                    if (!data.transactions || data.transactions.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No transactions found matching criteria.</td></tr>';
+                        if (pageIndicator) pageIndicator.innerText = `0 of ${data.total_count || 0}`;
+                        return;
+                    }
                     data.transactions.forEach(tx => {
                         let tierTag = '<span class="tag">Normal</span>';
                         if (tx.flag_top_0_5pct) tierTag = '<span class="tag tag-red">Top 0.5%</span>';
@@ -563,7 +635,13 @@
                         `;
                         tbody.appendChild(tr);
                     });
-                    document.getElementById('page-indicator').innerText = `Records ${currentOffset + 1} - ${currentOffset + data.transactions.length} of ${data.total_count}`;
+                    if (pageIndicator) {
+                        pageIndicator.innerText = `Records ${currentOffset + 1} - ${currentOffset + data.transactions.length} of ${data.total_count}`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Load transactions error:", err);
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--accent-red); padding: 2rem;">Error loading transactions: ${err.message}. <button class="btn-primary" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem;" onclick="loadTransactions()">Retry</button></td></tr>`;
                 });
         }
 
@@ -581,7 +659,10 @@
 
         function viewShap(txId) {
             fetch(`/api/transactions/${txId}`)
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(tx => {
                     document.getElementById('modal-title').innerText = `Transaction #${tx.transaction_id} Risk Assessment`;
                     let html = `
@@ -595,15 +676,19 @@
 
                     if (tx.top_shap_drivers) {
                         html += '<h4 style="color: var(--accent-red); margin-top: 0.75rem;">Top Risk-Increasing Drivers:</h4><ul style="padding-left: 1.25rem; margin-bottom: 0.75rem;">';
-                        tx.top_shap_drivers.top_risk_increasing.forEach(d => {
-                            html += `<li><code>${d.feature}</code> (+${d.attribution}) - <span style="color:var(--text-secondary);">${d.family}</span></li>`;
-                        });
+                        if (tx.top_shap_drivers.top_risk_increasing) {
+                            tx.top_shap_drivers.top_risk_increasing.forEach(d => {
+                                html += `<li><code>${d.feature}</code> (+${d.attribution}) - <span style="color:var(--text-secondary);">${d.family || ''}</span></li>`;
+                            });
+                        }
                         html += '</ul>';
 
                         html += '<h4 style="color: var(--accent-green);">Top Risk-Decreasing Drivers:</h4><ul style="padding-left: 1.25rem;">';
-                        tx.top_shap_drivers.top_risk_decreasing.forEach(d => {
-                            html += `<li><code>${d.feature}</code> (${d.attribution}) - <span style="color:var(--text-secondary);">${d.family}</span></li>`;
-                        });
+                        if (tx.top_shap_drivers.top_risk_decreasing) {
+                            tx.top_shap_drivers.top_risk_decreasing.forEach(d => {
+                                html += `<li><code>${d.feature}</code> (${d.attribution}) - <span style="color:var(--text-secondary);">${d.family || ''}</span></li>`;
+                            });
+                        }
                         html += '</ul>';
                     } else {
                         html += '<p style="color: var(--text-secondary);">SHAP drivers computed on representative alerts sample.</p>';
@@ -611,6 +696,9 @@
 
                     document.getElementById('modal-content').innerHTML = html;
                     document.getElementById('tx-modal').style.display = 'flex';
+                })
+                .catch(err => {
+                    alert(`Failed to load transaction details: ${err.message}`);
                 });
         }
 

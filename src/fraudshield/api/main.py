@@ -214,6 +214,7 @@ async def get_transactions(
     tier: Optional[str] = Query(None, description="Filter by tier: top_0.5pct, top_1.0pct, top_2.0pct, top_5.0pct"),
     min_score: Optional[float] = Query(None, ge=0.0, le=1.0),
     is_fraud: Optional[int] = Query(None, ge=0, le=1),
+    transaction_id: Optional[str] = Query(None, description="Filter by exact transaction ID"),
 ):
     """Query scored test transactions with flexible filtering and pagination."""
     conn = get_db_connection()
@@ -238,6 +239,12 @@ async def get_transactions(
     if is_fraud is not None:
         conditions.append("is_fraud = ?")
         params.append(is_fraud)
+
+    if transaction_id:
+        clean_id = transaction_id.strip().lstrip("#")
+        if clean_id.isdigit():
+            conditions.append("transaction_id = ?")
+            params.append(int(clean_id))
 
     where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
