@@ -84,7 +84,7 @@ pytest -q
 9. **Launch REST API & Dashboard**: `uvicorn fraudshield.api.main:app --host 127.0.0.1 --port 8000`
 
 > [!NOTE]
-> **Git Tag History (`v1.0-final`)**: The release tag `v1.0-final` was re-pointed once after cleanup. It was originally created at commit `abb677c` after implementing graceful API test skips and pinned dependencies, and subsequently re-pointed to include exact 6-decimal Brier scores for both Model B and Set C1 in `docs/MODEL_CARD.md` and the dedicated evaluation script `scripts/evaluate_model_b_calibration.py`.
+> **Git Tag History (`v1.0-final`)**: The release tag `v1.0-final` was re-pointed once after cleanup. It was originally created at commit `abb677c` after implementing graceful API test skips and pinned dependencies, and subsequently re-pointed to include exact 6-decimal Brier scores for both Model B and Set C1 in `docs/MODEL_CARD.md`, the dedicated evaluation script `scripts/evaluate_model_b_calibration.py`, and the verify.py data pipeline tie-handling fix.
 
 ---
 
